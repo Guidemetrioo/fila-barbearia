@@ -11,6 +11,13 @@ export interface Service {
   name: string;
   price: number;
   duration: number; // in minutes
+  description?: string;
+}
+
+export interface Dependent {
+  id: string;
+  name: string;
+  services: Service[];
 }
 
 export interface QueueEntry {
@@ -18,7 +25,9 @@ export interface QueueEntry {
   clientName: string;
   whatsapp: string;
   services: Service[];
-  barberId?: string;
+  barberId?: string; // specific barber ID or undefined for "sem preferência"
+  barberName?: string;
+  dependents?: Dependent[];
   status: 'waiting' | 'being-served' | 'completed' | 'cancelled';
   position: number;
   joinedAt: number;

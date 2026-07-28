@@ -1,16 +1,16 @@
 import { Barber, Service, ShopConfig } from '@/types';
 
 export const shopConfig: ShopConfig = {
-  name: 'BARBEARIA DEL REY',
+  name: 'JG BARBEARIA',
   description:
-    '"NA CENA" Toda honra e toda glória a Deus! Since 2011. Barbearia Del Rey oferece uma experiência premium com serviços de alta qualidade em um ambiente moderno. Conforto, confiança e excelente atendimento — o melhor do Belenzinho.',
-  instagram: 'https://www.instagram.com/delrey_barbearia/',
-  address: 'R. Sapucaia, 359 - Belenzinho, São Paulo - SP, 03170-050',
-  phone: '(11) 97236-2628',
+    'JG BARBEARIA oferece uma experiência completa, unindo serviços de alta qualidade com um ambiente moderno. Focada na satisfação, busca proporcionar conforto e confiança com excelente atendimento e um "tapa no visual" de respeito. "Mais que um corte, uma revolução no seu estilo"',
+  instagram: 'https://www.instagram.com/',
+  address: 'Rua Principal, 100 - São Paulo - SP',
+  phone: '(11) 99999-9999',
   logo: '/images/logo.png',
-  queueOpenTime: '08:30',
-  shopOpenTime: '09:00',
-  workingDays: 'Segunda a Sexta: 09:00–20:00 | Sábado: 09:00–19:00 | Domingo: Fechado',
+  queueOpenTime: '09:00',
+  shopOpenTime: '10:00',
+  workingDays: 'Segunda a Sábado: 09:00–20:00 | Domingo: Fechado',
   isOpen: true,
   isQueueOpen: true,
 };
@@ -18,29 +18,85 @@ export const shopConfig: ShopConfig = {
 export const initialBarbers: Barber[] = [
   {
     id: 'barber-1',
-    name: 'LUCAS',
+    name: 'GABRIEL',
     avatar: '/images/barber1.png',
     status: 'available',
   },
   {
     id: 'barber-2',
-    name: 'RAFAEL',
+    name: 'CLAUDIO',
     avatar: '/images/barber2.png',
-    status: 'available',
+    status: 'busy',
   },
   {
     id: 'barber-3',
-    name: 'MATHEUS',
+    name: 'LUCAS',
     avatar: '/images/barber3.png',
-    status: 'available',
+    status: 'busy',
+  },
+  {
+    id: 'barber-4',
+    name: 'RAPHAEL',
+    avatar: '/images/barber1.png',
+    status: 'busy',
   },
 ];
 
 export const services: Service[] = [
-  { id: 'svc-1', name: 'Corte Máquina', price: 35, duration: 30 },
-  { id: 'svc-2', name: 'Corte Tesoura', price: 45, duration: 40 },
-  { id: 'svc-3', name: 'Barba', price: 30, duration: 25 },
-  { id: 'svc-4', name: 'Corte + Barba', price: 65, duration: 55 },
-  { id: 'svc-5', name: 'Navalhado', price: 50, duration: 40 },
-  { id: 'svc-6', name: 'Sobrancelha', price: 15, duration: 10 },
+  {
+    id: 'svc-1',
+    name: 'CORTE',
+    price: 50,
+    duration: 40,
+    description: 'Corte tradicional ou moderno com tesoura e máquina.',
+  },
+  {
+    id: 'svc-2',
+    name: 'BARBA',
+    price: 40,
+    duration: 30,
+    description: 'Modelagem de barba com toalha quente e finalização.',
+  },
+  {
+    id: 'svc-3',
+    name: 'CORTE + BARBA',
+    price: 90,
+    duration: 70,
+    description: 'Combo completo de corte e barba.',
+  },
+  {
+    id: 'svc-4',
+    name: 'CORTE + SOBRANCELHA',
+    price: 70,
+    duration: 50,
+    description: 'Corte masculino + alinhamento de sobrancelha.',
+  },
+  {
+    id: 'svc-5',
+    name: 'SOBRANCELHA',
+    price: 20,
+    duration: 10,
+    description: 'Design e alinhamento de sobrancelha na navalha.',
+  },
+  {
+    id: 'svc-6',
+    name: 'BARBOTERAPIA',
+    price: 60,
+    duration: 45,
+    description: 'Tratamento completo para a pele do rosto e barba com vapor e óleos.',
+  },
+  {
+    id: 'svc-7',
+    name: 'ACABAMENTO / PEZINHO',
+    price: 25,
+    duration: 15,
+    description: 'Manutenção do contorno do cabelo e nuca.',
+  },
+  {
+    id: 'svc-8',
+    name: 'PROGRESSIVA',
+    price: 100,
+    duration: 60,
+    description: 'Alisamento e redução de volume dos fios.',
+  },
 ];

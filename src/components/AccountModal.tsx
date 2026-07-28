@@ -52,13 +52,21 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
     onClose();
   };
 
+  const totalPrice = entry
+    ? entry.services.reduce((sum, s) => sum + s.price, 0) +
+      (entry.dependents || []).reduce(
+        (sum, dep) => sum + dep.services.reduce((dSum, s) => dSum + s.price, 0),
+        0
+      )
+    : 0;
+
   return (
     <div className="modal-overlay" onClick={handleClose}>
       <div className="modal-content modal-content--center" onClick={e => e.stopPropagation()}>
         <div className="modal__header">
           <div>
-            <h3 className="modal__title">Minha conta</h3>
-            <p className="modal__subtitle">Digite seu WhatsApp para encontrar sua posição</p>
+            <h3 className="modal__title">Consultar minha posição</h3>
+            <p className="modal__subtitle">Digite seu WhatsApp para encontrar seu agendamento</p>
           </div>
           <button className="modal__close" onClick={handleClose}>✕</button>
         </div>
@@ -67,7 +75,7 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
           <>
             <div className="form-group">
               <label className="form-label">
-                WhatsApp <span>*</span>
+                WhatsApp com DDD <span>*</span>
               </label>
               <input
                 type="tel"
@@ -81,48 +89,83 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
               />
             </div>
             <button className="btn btn-gold btn-large" onClick={handleSearch}>
-              Buscar
+              🔍 Consultar Fila
             </button>
           </>
         ) : entry ? (
           <div className="account-info">
-            <div className="account-info__icon">👤</div>
+            <div className="account-info__icon">💈</div>
             <div className="account-info__name">{entry.clientName}</div>
-            <div className="account-info__position">
-              {entry.status === 'being-served'
-                ? '✂️ Você está sendo atendido!'
-                : `${entry.position}º na fila`}
+
+            <div className="account-info__position" style={{ marginTop: '0.5rem', fontSize: '1.2rem' }}>
+              {entry.status === 'being-served' ? (
+                <span style={{ color: 'var(--gold)' }}>✂️ Você está sendo atendido!</span>
+              ) : (
+                <span>Sua Posição: <strong>#{entry.position}º na fila</strong></span>
+              )}
             </div>
-            <div className="account-info__services">
-              {entry.services.map(s => s.name).join(', ')}
+
+            <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+              <p><strong>Profissional:</strong> {entry.barberName || 'Sem preferência (Qualquer barbeiro)'}</p>
+              <p><strong>Seus Serviços:</strong> {entry.services.map(s => s.name).join(', ')}</p>
+              {entry.dependents && entry.dependents.length > 0 && (
+                <p>
+                  <strong>Acompanhantes:</strong>{' '}
+                  {entry.dependents.map(d => `${d.name} (${d.services.map(s => s.name).join(', ')})`).join('; ')}
+                </p>
+              )}
+              <p style={{ color: 'var(--gold)', fontWeight: 700, marginTop: '0.4rem' }}>
+                Total: R$ {totalPrice.toFixed(2)}
+              </p>
             </div>
+
             {entry.status === 'waiting' && (
-              <>
-                <div className="account-info__wait">~{entry.estimatedWait} min</div>
-                <div className="account-info__wait-label">tempo estimado de espera</div>
-              </>
+              <div style={{ marginTop: '1rem', background: 'var(--card-bg-soft)', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                <div className="account-info__wait" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--gold)' }}>
+                  ~{entry.estimatedWait} min
+                </div>
+                <div className="account-info__wait-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Tempo estimado até o atendimento
+                </div>
+              </div>
             )}
 
             {entry.status === 'waiting' && !showConfirmCancel && (
               <button
                 className="btn btn-red btn-sm"
-                style={{ marginTop: '1.5rem' }}
+                style={{ marginTop: '1.5rem', width: '100%', justifyContent: 'center' }}
                 onClick={() => setShowConfirmCancel(true)}
               >
-                Cancelar minha posição
+                🚨 Sair da fila / Cancelar vaga
               </button>
             )}
 
             {showConfirmCancel && (
-              <div style={{ marginTop: '1.5rem' }}>
-                <p style={{ color: 'var(--red)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
-                  Tem certeza que deseja sair da fila?
+              <div
+                style={{
+                  marginTop: '1.25rem',
+                  padding: '0.85rem',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '0.5rem',
+                }}
+              >
+                <p style={{ color: '#ef4444', fontSize: '0.875rem', marginBottom: '0.75rem', fontWeight: 600 }}>
+                  Tem certeza que deseja cancelar sua vaga?
                 </p>
                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                  <button className="btn btn-outline btn-sm" onClick={() => setShowConfirmCancel(false)}>
-                    Não
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => setShowConfirmCancel(false)}
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  >
+                    Não, manter vaga
                   </button>
-                  <button className="btn btn-red btn-sm" onClick={handleCancel}>
+                  <button
+                    className="btn btn-red btn-sm"
+                    onClick={handleCancel}
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  >
                     Sim, cancelar
                   </button>
                 </div>
@@ -133,14 +176,14 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
           <div style={{ textAlign: 'center', padding: '2rem 0' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-              Nenhuma entrada encontrada para este WhatsApp.
+              Nenhum agendamento ativo encontrado para este número.
             </p>
             <button
               className="btn btn-outline btn-sm"
               style={{ marginTop: '1rem' }}
               onClick={() => setSearched(false)}
             >
-              Tentar outro número
+              Tentar outro WhatsApp
             </button>
           </div>
         )}

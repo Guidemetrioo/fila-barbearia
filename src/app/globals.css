@@ -1389,3 +1389,340 @@ input {
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
 }
+
+/* ==========================================
+   NEW FEATURES (filaparacorte.com match)
+   ========================================== */
+
+/* Announcement Banner */
+.announcement-banner {
+  background: var(--bg-card-alt);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-shadow: 0 0 15px rgba(251, 177, 35, 0.05);
+}
+
+.announcement-banner__item {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--gold-light);
+  text-transform: uppercase;
+}
+
+.announcement-banner__item--clickable {
+  color: #ef4444;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.announcement-banner__item--clickable:hover {
+  transform: scale(1.02);
+  text-decoration: underline;
+}
+
+/* Navigation Tabs */
+.nav-tabs {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-6);
+  scrollbar-width: none;
+}
+
+.nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-tab {
+  background: var(--bg-card);
+  border: 1px solid var(--border-accent);
+  color: var(--text-secondary);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.nav-tab:hover {
+  border-color: var(--border-gold);
+  color: var(--text-primary);
+}
+
+.nav-tab.active {
+  background: linear-gradient(135deg, var(--gold-glow-strong), var(--bg-card));
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: var(--shadow-gold);
+}
+
+/* Barber Selection Grid in Modal */
+.barber-selection-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.barber-option-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.barber-option-card:hover {
+  border-color: var(--border-gold);
+  background: var(--bg-card-hover);
+}
+
+.barber-option-card.selected {
+  border-color: var(--gold);
+  background: var(--gold-glow);
+  box-shadow: 0 0 10px rgba(251, 177, 35, 0.15);
+}
+
+.barber-option-card__info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.barber-option-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1px solid var(--gold);
+}
+
+.barber-option-card__avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--gold-glow);
+  border: 1px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.barber-option-card__name {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.barber-option-card__sub {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.barber-option-card__badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #000;
+  background: var(--gold);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.barber-option-card__wait {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--gold);
+}
+
+/* Barber Card Sub Queue & Details */
+.barber-card__serving-box {
+  background: rgba(0, 0, 0, 0.2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+}
+
+.barber-card__serving-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.barber-card__serving-client {
+  display: flex;
+  flex-direction: column;
+}
+
+.barber-card__client-name {
+  font-weight: 700;
+  font-size: var(--font-size-xs);
+  color: var(--gold);
+}
+
+.barber-card__service-name {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.barber-card__empty-serving {
+  font-size: var(--font-size-xs);
+  color: var(--green-text);
+  font-weight: 600;
+}
+
+.barber-card__subqueue {
+  margin-bottom: var(--space-3);
+}
+
+.barber-card__subqueue-title {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  display: block;
+  margin-bottom: var(--space-1);
+}
+
+.barber-card__subqueue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.barber-card__subqueue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.barber-card__subqueue-pos {
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.barber-card__subqueue-name {
+  color: var(--text-primary);
+  flex: 1;
+  margin: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barber-card__subqueue-wait {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+}
+
+.barber-card__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  border-top: 1px dashed var(--border-primary);
+  padding-top: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* Public Services Section */
+.services-public-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.service-card-public {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  transition: all var(--transition-fast);
+}
+
+.service-card-public:hover {
+  border-color: var(--border-gold);
+  transform: translateY(-2px);
+}
+
+.service-card-public__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.service-card-public__name {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.service-card-public__price {
+  font-weight: 800;
+  font-size: var(--font-size-base);
+  color: var(--gold);
+}
+
+.service-card-public__desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+  line-height: 1.5;
+}
+
+.service-card-public__footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: var(--space-2);
+}
+
+.service-card-public__duration {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* Floating WhatsApp Button */
+.floating-whatsapp {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+  z-index: 99;
+  transition: all 0.3s ease;
+}
+
+.floating-whatsapp:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+}
+
