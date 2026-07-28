@@ -116,7 +116,7 @@ export default function BarberCard({ barber, queueEntries }: BarberCardProps) {
           <polyline points="12,6 12,12 16,14" />
         </svg>
         <span>
-          Wait time: {totalWait === 0 ? 'Sem espera (Livre)' : `~${totalWait} min de espera`}
+          Tempo de espera: {totalWait === 0 ? 'Sem espera (Livre)' : `~${totalWait} min de espera`}
         </span>
       </div>
     </div>

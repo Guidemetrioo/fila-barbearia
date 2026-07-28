@@ -174,7 +174,7 @@ export default function AdminPage() {
                 {barber.status === 'available' && 'Livre'}
                 {barber.status === 'busy' && (serving ? `→ ${serving.clientName}` : 'Ocupado')}
                 {barber.status === 'break' && 'Em pausa'}
-                {barber.status === 'offline' && 'Offline'}
+                {barber.status === 'offline' && 'Indisponível'}
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {barber.status === 'available' && waitingEntries.length > 0 && (
@@ -214,7 +214,7 @@ export default function AdminPage() {
                     className="btn btn-red btn-sm"
                     onClick={() => setBarberStatus(barber.id, 'offline')}
                   >
-                    Offline
+                    Desativar
                   </button>
                 )}
                 {barber.status === 'offline' && (
