@@ -10,7 +10,7 @@ export const shopConfig: ShopConfig = {
   logo: '/images/logo.png',
   queueOpenTime: '08:30',
   shopOpenTime: '09:00',
-  workingDays: 'Segunda a Sexta: 09:00–20:00 | Sábado: 09:00–19:00 | Domingo: Fechado',
+  workingDays: 'Terça a Domingo: 09:00–20:00 | Segunda: Fechado',
   isOpen: true,
   isQueueOpen: true,
 };

@@ -29,7 +29,7 @@ export default function ShopInfo() {
         alignItems: 'center',
       }}>
         <a
-          href="https://www.google.com/maps/search/Barbearia+Del+Rey+Rua+Sapucaia+359+Belenzinho"
+          href="https://www.google.com/maps/dir/?api=1&destination=Barbearia+Del+Rey,+R.+Sapucaia,+359+-+Belenzinho,+São+Paulo+-+SP&travelmode=driving"
           target="_blank"
           rel="noopener noreferrer"
           style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}
