@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Barber, QueueEntry, Service, ShopConfig, Dependent } from '@/types';
+import { Barber, QueueEntry, Service, ShopConfig, Dependent, HistoryEntry } from '@/types';
 import { shopConfig as defaultConfig, initialBarbers, services as defaultServices } from '@/data/shopConfig';
 
 interface QueueContextType {
@@ -9,6 +9,7 @@ interface QueueContextType {
   barbers: Barber[];
   queue: QueueEntry[];
   services: Service[];
+  history: HistoryEntry[];
   addToQueue: (
     clientName: string,
     whatsapp: string,
@@ -26,6 +27,7 @@ interface QueueContextType {
   cancelEntry: (id: string) => void;
   getBarberQueue: (barberId: string) => QueueEntry[];
   getBarberWaitTime: (barberId: string) => number;
+  clearHistory: () => void;
 }
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ const STORAGE_KEYS = {
   queue: 'delrey_queue',
   barbers: 'delrey_barbers',
   config: 'delrey_config',
+  history: 'delrey_history',
 };
 
 export function QueueProvider({ children }: { children: ReactNode }) {
@@ -41,6 +44,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
   const [barbers, setBarbers] = useState<Barber[]>(initialBarbers);
   const [queue, setQueue] = useState<QueueEntry[]>([]);
   const [services] = useState<Service[]>(defaultServices);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load from localStorage on mount
@@ -49,10 +53,12 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       const savedQueue = localStorage.getItem(STORAGE_KEYS.queue);
       const savedBarbers = localStorage.getItem(STORAGE_KEYS.barbers);
       const savedConfig = localStorage.getItem(STORAGE_KEYS.config);
+      const savedHistory = localStorage.getItem(STORAGE_KEYS.history);
 
       if (savedQueue) setQueue(JSON.parse(savedQueue));
       if (savedBarbers) setBarbers(JSON.parse(savedBarbers));
       if (savedConfig) setConfig({ ...defaultConfig, ...JSON.parse(savedConfig) });
+      if (savedHistory) setHistory(JSON.parse(savedHistory));
     } catch (e) {
       console.error('Error loading from localStorage:', e);
     }
@@ -75,6 +81,11 @@ export function QueueProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.config, JSON.stringify(config));
   }, [config, isLoaded]);
 
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(history));
+  }, [history, isLoaded]);
+
   const getBarberQueue = useCallback(
     (barberId: string) => {
       return queue.filter(
@@ -94,7 +105,6 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         if (waitingForThisBarber.length === 0) return 0;
       }
 
-      // Calculate total duration of current client + waiting clients for this barber
       let totalMinutes = barber?.status === 'busy' ? 35 : 0;
       const waiting = queue.filter(
         e => e.status === 'waiting' && (e.barberId === barberId || !e.barberId)
@@ -228,7 +238,30 @@ export function QueueProvider({ children }: { children: ReactNode }) {
   const finishClient = useCallback(
     (entryId: string) => {
       const entry = queue.find(e => e.id === entryId);
-      if (entry?.barberId) {
+      if (!entry) return;
+
+      // Save to history
+      const totalPrice = entry.services.reduce((sum, s) => sum + s.price, 0) +
+        (entry.dependents || []).reduce(
+          (sum, d) => sum + d.services.reduce((s, sv) => s + sv.price, 0), 0
+        );
+
+      const historyItem: HistoryEntry = {
+        id: entry.id,
+        clientName: entry.clientName,
+        whatsapp: entry.whatsapp,
+        services: entry.services,
+        barberId: entry.barberId || '',
+        barberName: entry.barberName || '',
+        dependents: entry.dependents,
+        joinedAt: entry.joinedAt,
+        completedAt: Date.now(),
+        totalPrice,
+      };
+
+      setHistory(prev => [historyItem, ...prev]);
+
+      if (entry.barberId) {
         setBarbers(prev =>
           prev.map(b =>
             b.id === entry.barberId
@@ -275,6 +308,10 @@ export function QueueProvider({ children }: { children: ReactNode }) {
     [queue]
   );
 
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+  }, []);
+
   return (
     <QueueContext.Provider
       value={{
@@ -282,6 +319,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         barbers,
         queue,
         services,
+        history,
         addToQueue,
         removeFromQueue,
         callClient,
@@ -293,6 +331,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         cancelEntry,
         getBarberQueue,
         getBarberWaitTime,
+        clearHistory,
       }}
     >
       {children}

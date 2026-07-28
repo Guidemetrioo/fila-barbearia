@@ -25,13 +25,27 @@ export interface QueueEntry {
   clientName: string;
   whatsapp: string;
   services: Service[];
-  barberId?: string; // specific barber ID or undefined for "sem preferência"
+  barberId?: string;
   barberName?: string;
   dependents?: Dependent[];
   status: 'waiting' | 'being-served' | 'completed' | 'cancelled';
   position: number;
   joinedAt: number;
   estimatedWait: number; // in minutes
+  completedAt?: number;
+}
+
+export interface HistoryEntry {
+  id: string;
+  clientName: string;
+  whatsapp: string;
+  services: Service[];
+  barberId: string;
+  barberName: string;
+  dependents?: Dependent[];
+  joinedAt: number;
+  completedAt: number;
+  totalPrice: number;
 }
 
 export interface ShopConfig {
