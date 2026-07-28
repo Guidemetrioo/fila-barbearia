@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQueue } from '@/context/QueueContext';
 import { Service, Dependent } from '@/types';
 
@@ -11,7 +11,7 @@ interface JoinQueueModalProps {
 
 export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps) {
   const { services, barbers, addToQueue, config, getBarberWaitTime } = useQueue();
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<number>(1);
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [selectedBarberId, setSelectedBarberId] = useState<string>('any');
@@ -30,6 +30,32 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
   });
 
   if (!isOpen) return null;
+
+  // Generate next 7 days for day selector
+  const nextDays = useMemo(() => {
+    const days: { date: string; label: string; weekday: string }[] = [];
+    const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const dateStr = d.toISOString().split('T')[0];
+      const day = d.getDate().toString().padStart(2, '0');
+      const month = (d.getMonth() + 1).toString().padStart(2, '0');
+      days.push({
+        date: dateStr,
+        label: `${day}/${month}`,
+        weekday: weekdays[d.getDay()],
+      });
+    }
+    return days;
+  }, []);
+
+  // Available time slots (9:00 to 20:00)
+  const timeSlots = [
+    '09:00', '10:00', '11:00', '12:00',
+    '13:00', '14:00', '15:00', '16:00',
+    '17:00', '18:00', '19:00', '20:00',
+  ];
 
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, '');
@@ -84,6 +110,30 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
     setDependents(prev => prev.filter(d => d.id !== id));
   };
 
+  // Step flow:
+  // Queue: 1(dados) -> 2(barbeiro) -> 3(serviços) -> 4(confirmação)
+  // Scheduled: 1(dados) -> 2(reservar horário) -> 3(barbeiro) -> 4(serviços) -> 5(confirmação)
+  const totalSteps = entryMode === 'scheduled' ? 5 : 4;
+
+  const getStepTitle = () => {
+    if (entryMode === 'queue') {
+      switch (step) {
+        case 1: return '1. Seus dados';
+        case 2: return '2. Escolha o Profissional';
+        case 3: return '3. Selecione os Serviços';
+        case 4: return '4. Confirmação & Dependentes';
+      }
+    } else {
+      switch (step) {
+        case 1: return '1. Seus dados';
+        case 2: return 'RESERVE SEU HORÁRIO';
+        case 3: return '3. Escolha o Profissional';
+        case 4: return '4. Selecione os Serviços';
+        case 5: return '5. Confirmação & Dependentes';
+      }
+    }
+  };
+
   const handleStep1 = () => {
     if (!name.trim()) {
       setError('Por favor, digite seu nome.');
@@ -97,18 +147,27 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
     setStep(2);
   };
 
-  const handleStep2 = () => {
+  const handleScheduleStep = () => {
+    if (!scheduledTime) {
+      setError('Selecione um horário.');
+      return;
+    }
     setError('');
     setStep(3);
   };
 
-  const handleStep3 = () => {
+  const handleBarberStep = () => {
+    setError('');
+    setStep(entryMode === 'scheduled' ? 4 : 3);
+  };
+
+  const handleServicesStep = () => {
     if (selectedServices.length === 0) {
       setError('Selecione pelo menos um serviço para você.');
       return;
     }
     setError('');
-    setStep(4);
+    setStep(entryMode === 'scheduled' ? 5 : 4);
   };
 
   const handleSubmit = () => {
@@ -163,6 +222,11 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
   );
   const totalDuration = mainDuration + depsDuration;
 
+  // Which step is the barber step / services step / confirm step
+  const barberStep = entryMode === 'scheduled' ? 3 : 2;
+  const servicesStep = entryMode === 'scheduled' ? 4 : 3;
+  const confirmStep = entryMode === 'scheduled' ? 5 : 4;
+
   if (success) {
     return (
       <div className="modal-overlay" onClick={handleClose}>
@@ -190,16 +254,33 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <div className="modal__header">
           <div>
-            <h3 className="modal__title">
-              {step === 1 && '1. Seus dados'}
-              {step === 2 && '2. Escolha o Profissional'}
-              {step === 3 && '3. Selecione os Serviços'}
-              {step === 4 && '4. Confirmação & Dependentes'}
-            </h3>
-            <p className="modal__subtitle">{config.name} • {entryMode === 'scheduled' ? 'Agendamento com Horário' : 'Atendimento por Ordem de Chegada'}</p>
+            <h3 className="modal__title">{getStepTitle()}</h3>
+            <p className="modal__subtitle">
+              {step === 2 && entryMode === 'scheduled'
+                ? `Etapa ${step} de ${totalSteps}`
+                : `${config.name} • ${entryMode === 'scheduled' ? 'Agendamento com Horário' : 'Atendimento por Ordem de Chegada'}`}
+            </p>
           </div>
           <button className="modal__close" onClick={handleClose}>✕</button>
         </div>
+
+        {/* Step indicator dots for scheduled mode */}
+        {entryMode === 'scheduled' && step === 2 && (
+          <div style={{ display: 'flex', gap: '4px', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+            {Array.from({ length: totalSteps }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: i < step ? '20px' : '8px',
+                  height: '6px',
+                  borderRadius: '3px',
+                  background: i < step ? 'var(--gold)' : 'var(--border-primary)',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            ))}
+          </div>
+        )}
 
         {error && (
           <div
@@ -217,7 +298,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
           </div>
         )}
 
-        {/* Step 1: Dados do Cliente + Modo */}
+        {/* ========= STEP 1: Dados + Modo ========= */}
         {step === 1 && (
           <>
             {/* Mode Toggle */}
@@ -246,7 +327,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
 
             {entryMode === 'scheduled' && (
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem', textAlign: 'center', padding: '0.5rem', background: 'rgba(251,177,35,0.06)', borderRadius: '0.5rem', border: '1px solid rgba(251,177,35,0.15)' }}>
-                📅 Escolha a data e horário. Você ficará na fila no horário marcado.
+                📅 Escolha a data e horário na próxima etapa. Você ficará na fila no horário marcado.
               </p>
             )}
 
@@ -277,49 +358,75 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
               />
             </div>
 
-            {/* Scheduling fields */}
-            {entryMode === 'scheduled' && (
-              <>
-                <div className="form-group">
-                  <label className="form-label">
-                    📅 Data <span>*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="form-input"
-                    value={scheduledDate}
-                    onChange={e => setScheduledDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">
-                    🕐 Horário <span>*</span>
-                  </label>
-                  <input
-                    type="time"
-                    className="form-input"
-                    value={scheduledTime}
-                    onChange={e => setScheduledTime(e.target.value)}
-                    min="09:00"
-                    max="20:00"
-                    step="1800"
-                  />
-                </div>
-              </>
-            )}
-
             <button className="btn btn-gold btn-large" onClick={handleStep1}>
               Avançar →
             </button>
           </>
         )}
 
-        {/* Step 2: Escolha do Profissional */}
-        {step === 2 && (
+        {/* ========= STEP 2 (Scheduled only): RESERVE SEU HORÁRIO ========= */}
+        {step === 2 && entryMode === 'scheduled' && (
+          <>
+            {/* Day selector */}
+            <div className="schedule-section">
+              <label className="schedule-label">SELECIONE O DIA</label>
+              <div className="schedule-days">
+                {nextDays.map(day => (
+                  <button
+                    key={day.date}
+                    className={`schedule-day-chip ${scheduledDate === day.date ? 'active' : ''}`}
+                    onClick={() => setScheduledDate(day.date)}
+                  >
+                    {day.weekday} {day.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Manual date input */}
+            <div className="schedule-section">
+              <label className="schedule-label">OU DIGITE OUTRA DATA (DD/MM/AAAA)</label>
+              <input
+                type="date"
+                className="form-input"
+                value={scheduledDate}
+                onChange={e => setScheduledDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+
+            {/* Time slots grid */}
+            <div className="schedule-section">
+              <label className="schedule-label">HORÁRIOS DISPONÍVEIS</label>
+              <div className="schedule-time-grid">
+                {timeSlots.map(time => (
+                  <button
+                    key={time}
+                    className={`schedule-time-slot ${scheduledTime === time ? 'active' : ''}`}
+                    onClick={() => setScheduledTime(time)}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+              <button className="btn btn-outline" onClick={() => setStep(1)} style={{ flex: 1, justifyContent: 'center', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>
+                Voltar
+              </button>
+              <button className="btn btn-gold" onClick={handleScheduleStep} style={{ flex: 1, justifyContent: 'center', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>
+                Próximo &gt;
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ========= BARBER STEP ========= */}
+        {step === barberStep && !(step === 2 && entryMode === 'scheduled') && (
           <>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              Selecione com qual barbeiro deseja cortar ou escolha "Sem preferência".
+              Selecione com qual barbeiro deseja cortar ou escolha &quot;Sem preferência&quot;.
             </p>
             <div className="barber-selection-grid">
               <div
@@ -368,18 +475,18 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-              <button className="btn btn-outline" onClick={() => setStep(1)} style={{ flex: 1, justifyContent: 'center' }}>
+              <button className="btn btn-outline" onClick={() => setStep(entryMode === 'scheduled' ? 2 : 1)} style={{ flex: 1, justifyContent: 'center' }}>
                 Voltar
               </button>
-              <button className="btn btn-gold" onClick={handleStep2} style={{ flex: 2, justifyContent: 'center' }}>
+              <button className="btn btn-gold" onClick={handleBarberStep} style={{ flex: 2, justifyContent: 'center' }}>
                 Avançar →
               </button>
             </div>
           </>
         )}
 
-        {/* Step 3: Seleção de Serviços */}
-        {step === 3 && (
+        {/* ========= SERVICES STEP ========= */}
+        {step === servicesStep && (
           <>
             <div className="form-group">
               <label className="form-label">
@@ -421,22 +528,22 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-              <button className="btn btn-outline" onClick={() => setStep(2)} style={{ flex: 1, justifyContent: 'center' }}>
+              <button className="btn btn-outline" onClick={() => setStep(barberStep)} style={{ flex: 1, justifyContent: 'center' }}>
                 Voltar
               </button>
-              <button className="btn btn-gold" onClick={handleStep3} style={{ flex: 2, justifyContent: 'center' }}>
+              <button className="btn btn-gold" onClick={handleServicesStep} style={{ flex: 2, justifyContent: 'center' }}>
                 Avançar →
               </button>
             </div>
           </>
         )}
 
-        {/* Step 4: Confirmação & Adicionar Dependentes */}
-        {step === 4 && (
+        {/* ========= CONFIRMATION STEP ========= */}
+        {step === confirmStep && (
           <>
             <div style={{ marginBottom: '1.25rem', background: 'var(--card-bg-soft)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--border)' }}>
               <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--gold)', marginBottom: '0.5rem' }}>
-                📋 Resumo do Agendamento
+                📋 Resumo do {entryMode === 'scheduled' ? 'Agendamento' : 'Atendimento'}
               </h4>
               <div style={{ fontSize: '0.85rem', color: '#e2e8f0' }}>
                 <p><strong>Cliente:</strong> {name} ({whatsapp})</p>
@@ -570,7 +677,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
             )}
 
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button className="btn btn-outline" onClick={() => setStep(3)} style={{ flex: 1, justifyContent: 'center' }}>
+              <button className="btn btn-outline" onClick={() => setStep(servicesStep)} style={{ flex: 1, justifyContent: 'center' }}>
                 Voltar
               </button>
               <button className="btn btn-gold" onClick={handleSubmit} style={{ flex: 2, justifyContent: 'center' }}>

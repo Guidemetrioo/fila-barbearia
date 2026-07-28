@@ -788,6 +788,113 @@ input {
 
 
 /* ==========================================
+   SCHEDULING / RESERVE SEU HORÁRIO
+   ========================================== */
+
+.schedule-section {
+  margin-bottom: 1.25rem;
+}
+
+.schedule-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.6rem;
+}
+
+.schedule-days {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.schedule-days::-webkit-scrollbar {
+  height: 4px;
+}
+
+.schedule-days::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.schedule-days::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 2px;
+}
+
+.schedule-day-chip {
+  flex-shrink: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.schedule-day-chip:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+.schedule-day-chip.active {
+  background: var(--gold);
+  color: #000;
+  border-color: var(--gold);
+  font-weight: 800;
+  box-shadow: 0 0 12px rgba(251, 177, 35, 0.25);
+}
+
+.schedule-time-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.schedule-time-slot {
+  padding: 0.65rem 0.5rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.schedule-time-slot:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.schedule-time-slot.active {
+  background: var(--gold);
+  color: #000;
+  border-color: var(--gold);
+  font-weight: 800;
+  box-shadow: 0 0 12px rgba(251, 177, 35, 0.25);
+}
+
+@media (max-width: 380px) {
+  .schedule-time-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ==========================================
    JOIN QUEUE MODAL
    ========================================== */
 
