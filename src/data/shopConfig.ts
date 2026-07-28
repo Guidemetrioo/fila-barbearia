@@ -1,16 +1,16 @@
 import { Barber, Service, ShopConfig } from '@/types';
 
 export const shopConfig: ShopConfig = {
-  name: 'JG BARBEARIA',
+  name: 'BARBEARIA DEL REY',
   description:
-    'JG BARBEARIA oferece uma experiência completa, unindo serviços de alta qualidade com um ambiente moderno. Focada na satisfação, busca proporcionar conforto e confiança com excelente atendimento e um "tapa no visual" de respeito. "Mais que um corte, uma revolução no seu estilo"',
-  instagram: 'https://www.instagram.com/',
-  address: 'Rua Principal, 100 - São Paulo - SP',
-  phone: '(11) 99999-9999',
+    '"NA CENA" Toda honra e toda glória a Deus! Since 2011. Barbearia Del Rey oferece uma experiência premium com serviços de alta qualidade em um ambiente moderno. Conforto, confiança e excelente atendimento — o melhor do Belenzinho. ⭐ 4,8 estrelas no Google (33 avaliações)',
+  instagram: 'https://www.instagram.com/delrey_barbearia/',
+  address: 'R. Sapucaia, 359 - Belenzinho, São Paulo - SP, 03170-050',
+  phone: '(11) 97236-2628',
   logo: '/images/logo.png',
-  queueOpenTime: '09:00',
-  shopOpenTime: '10:00',
-  workingDays: 'Segunda a Sábado: 09:00–20:00 | Domingo: Fechado',
+  queueOpenTime: '08:30',
+  shopOpenTime: '09:00',
+  workingDays: 'Segunda a Sexta: 09:00–20:00 | Sábado: 09:00–19:00 | Domingo: Fechado',
   isOpen: true,
   isQueueOpen: true,
 };
@@ -18,27 +18,21 @@ export const shopConfig: ShopConfig = {
 export const initialBarbers: Barber[] = [
   {
     id: 'barber-1',
-    name: 'GABRIEL',
+    name: 'LUCAS',
     avatar: '/images/barber1.png',
     status: 'available',
   },
   {
     id: 'barber-2',
-    name: 'CLAUDIO',
+    name: 'RAFAEL',
     avatar: '/images/barber2.png',
-    status: 'busy',
+    status: 'available',
   },
   {
     id: 'barber-3',
-    name: 'LUCAS',
+    name: 'MATHEUS',
     avatar: '/images/barber3.png',
-    status: 'busy',
-  },
-  {
-    id: 'barber-4',
-    name: 'RAPHAEL',
-    avatar: '/images/barber1.png',
-    status: 'busy',
+    status: 'available',
   },
 ];
 

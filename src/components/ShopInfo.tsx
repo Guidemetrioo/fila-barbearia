@@ -28,9 +28,14 @@ export default function ShopInfo() {
         gap: '0.5rem',
         alignItems: 'center',
       }}>
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+        <a
+          href="https://www.google.com/maps/search/Barbearia+Del+Rey+Rua+Sapucaia+359+Belenzinho"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}
+        >
           📍 {config.address}
-        </p>
+        </a>
         <a
           href={`https://wa.me/55${(config.phone || '').replace(/\D/g, '')}`}
           target="_blank"
@@ -45,6 +50,9 @@ export default function ShopInfo() {
         >
           📱 {config.phone}
         </a>
+        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+          💳 Crédito, Débito e NFC • 🚻 Banheiro • 👶 Bom para crianças
+        </p>
       </div>
       <p className="shop-info__cancel-note">
         💇 ( Para CANCELAR clique em {'->'} ENTRAR NA MINHA CONTA ) 💇
