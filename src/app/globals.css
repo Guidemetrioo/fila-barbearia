@@ -676,18 +676,21 @@ input {
   gap: var(--space-3);
 }
 
-.queue-list__item-position {
-  width: 32px;
-  height: 32px;
+.queue-list__item-icon {
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-full);
   background: var(--gold-glow);
   border: 1px solid var(--border-gold);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: var(--font-size-sm);
-  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.queue-list__item--serving .queue-list__item-icon {
+  background: var(--gold-glow-strong);
+  border-color: var(--gold);
 }
 
 .queue-list__item-name {
@@ -698,17 +701,75 @@ input {
 .queue-list__item-service {
   font-size: var(--font-size-xs);
   color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.queue-list__item-barber {
+  font-size: var(--font-size-xs);
+  color: var(--gold);
+  font-weight: 600;
+  margin-top: 2px;
 }
 
 .queue-list__item-wait {
   text-align: right;
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
-.queue-list__item-wait-label {
-  color: var(--text-muted);
+.queue-list__item-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
 }
+
+.queue-list__item-badge--serving {
+  background: rgba(251, 177, 35, 0.15);
+  color: var(--gold);
+  border: 1px solid var(--border-gold);
+}
+
+/* Barber filter active state */
+.barber-card--filter-active {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 2px var(--gold-glow), 0 0 20px rgba(251, 177, 35, 0.15) !important;
+}
+
+.barber-card__filter-badge {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  padding: 4px 0;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-gold);
+  letter-spacing: 0.5px;
+}
+
+/* Queue filter banner */
+.queue-filter-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(135deg, rgba(251, 177, 35, 0.1), rgba(251, 177, 35, 0.03));
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--gold);
+  animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 
 /* ==========================================
    JOIN QUEUE MODAL

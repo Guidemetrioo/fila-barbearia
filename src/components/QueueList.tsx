@@ -2,16 +2,29 @@
 
 import { useQueue } from '@/context/QueueContext';
 
-export default function QueueList() {
+interface QueueListProps {
+  filterBarberId?: string | null;
+}
+
+export default function QueueList({ filterBarberId }: QueueListProps) {
   const { queue } = useQueue();
-  const waitingEntries = queue
+
+  let waitingEntries = queue
     .filter(e => e.status === 'waiting')
     .sort((a, b) => a.position - b.position);
-  const servingEntries = queue.filter(e => e.status === 'being-served');
+  let servingEntries = queue.filter(e => e.status === 'being-served');
+
+  // Apply barber filter if active
+  if (filterBarberId) {
+    waitingEntries = waitingEntries.filter(e => e.barberId === filterBarberId || !e.barberId);
+    servingEntries = servingEntries.filter(e => e.barberId === filterBarberId);
+  }
 
   return (
     <div className="section-card">
-      <h3 className="queue-list__title">Fila de espera</h3>
+      <h3 className="queue-list__title">
+        Fila de espera
+      </h3>
 
       {waitingEntries.length === 0 && servingEntries.length === 0 ? (
         <div className="queue-list__empty">
@@ -23,21 +36,26 @@ export default function QueueList() {
           {servingEntries.map(entry => (
             <div key={entry.id} className="queue-list__item queue-list__item--serving">
               <div className="queue-list__item-left">
-                <div className="queue-list__item-position" style={{
-                  background: 'var(--gold-glow-strong)',
-                  borderColor: 'var(--gold)',
-                }}>
-                  ✂️
+                <div className="queue-list__item-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
                 </div>
                 <div>
                   <div className="queue-list__item-name">{entry.clientName}</div>
                   <div className="queue-list__item-service">
-                    {entry.services.map(s => s.name).join(', ')}
+                    {entry.services.map(s => s.name).join(' + ')}
                   </div>
+                  {entry.barberName && (
+                    <div className="queue-list__item-barber">
+                      Profissional: {entry.barberName}
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="queue-list__item-wait">
-                <div style={{ color: 'var(--gold)', fontWeight: 600 }}>Sendo atendido</div>
+              <div className="queue-list__item-badge queue-list__item-badge--serving">
+                Em atendimento
               </div>
             </div>
           ))}
@@ -45,17 +63,31 @@ export default function QueueList() {
           {waitingEntries.map(entry => (
             <div key={entry.id} className="queue-list__item">
               <div className="queue-list__item-left">
-                <div className="queue-list__item-position">{entry.position}</div>
+                <div className="queue-list__item-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
                 <div>
                   <div className="queue-list__item-name">{entry.clientName}</div>
                   <div className="queue-list__item-service">
-                    {entry.services.map(s => s.name).join(', ')}
+                    {entry.services.map(s => s.name).join(' + ')}
                   </div>
+                  {entry.barberName && (
+                    <div className="queue-list__item-barber">
+                      Profissional: {entry.barberName}
+                    </div>
+                  )}
+                  {!entry.barberName && (
+                    <div className="queue-list__item-barber" style={{ opacity: 0.5 }}>
+                      Sem preferência de profissional
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="queue-list__item-wait">
                 <div>~{entry.estimatedWait} min</div>
-                <div className="queue-list__item-wait-label">espera estimada</div>
               </div>
             </div>
           ))}

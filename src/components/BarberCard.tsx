@@ -7,9 +7,11 @@ import { useQueue } from '@/context/QueueContext';
 interface BarberCardProps {
   barber: Barber;
   queueEntries: QueueEntry[];
+  isFilterActive?: boolean;
+  onToggleFilter?: (barberId: string) => void;
 }
 
-export default function BarberCard({ barber, queueEntries }: BarberCardProps) {
+export default function BarberCard({ barber, queueEntries, isFilterActive, onToggleFilter }: BarberCardProps) {
   const { getBarberWaitTime } = useQueue();
 
   const servingEntry = queueEntries.find(
@@ -41,7 +43,18 @@ export default function BarberCard({ barber, queueEntries }: BarberCardProps) {
   };
 
   return (
-    <div className={`barber-card ${getStatusClass()}`}>
+    <div
+      className={`barber-card ${getStatusClass()} ${isFilterActive ? 'barber-card--filter-active' : ''}`}
+      onClick={() => onToggleFilter?.(barber.id)}
+      style={{ cursor: onToggleFilter ? 'pointer' : 'default' }}
+    >
+      {/* Filter indicator */}
+      {isFilterActive && (
+        <div className="barber-card__filter-badge">
+          🔍 Filtrando fila
+        </div>
+      )}
+
       {/* Header */}
       <div className="barber-card__header">
         <div style={{ position: 'relative' }}>

@@ -18,6 +18,13 @@ export default function Home() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'queue' | 'barbers' | 'services' | 'help'>('queue');
+  const [filterBarberId, setFilterBarberId] = useState<string | null>(null);
+
+  const handleToggleBarberFilter = (barberId: string) => {
+    setFilterBarberId(prev => prev === barberId ? null : barberId);
+  };
+
+  const activeFilterBarber = barbers.find(b => b.id === filterBarberId);
 
   return (
     <>
@@ -109,19 +116,39 @@ export default function Home() {
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                Barbeiros em Atendimento
+                Barbeiros — Clique para filtrar a fila
               </h3>
               <div className="barbers-grid">
                 {barbers
                   .filter(b => b.status !== 'offline')
                   .map(barber => (
-                    <BarberCard key={barber.id} barber={barber} queueEntries={queue} />
+                    <BarberCard
+                      key={barber.id}
+                      barber={barber}
+                      queueEntries={queue}
+                      isFilterActive={filterBarberId === barber.id}
+                      onToggleFilter={handleToggleBarberFilter}
+                    />
                   ))}
               </div>
             </div>
 
+            {/* Filter indicator */}
+            {filterBarberId && activeFilterBarber && (
+              <div className="queue-filter-banner">
+                <span>🔍 Filtrando fila de: <strong>{activeFilterBarber.name}</strong></span>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => setFilterBarberId(null)}
+                  style={{ padding: '0.25rem 0.75rem' }}
+                >
+                  ✕ Ver todos
+                </button>
+              </div>
+            )}
+
             {/* General Queue List */}
-            <QueueList />
+            <QueueList filterBarberId={filterBarberId} />
           </>
         )}
 
