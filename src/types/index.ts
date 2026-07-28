@@ -33,6 +33,9 @@ export interface QueueEntry {
   joinedAt: number;
   estimatedWait: number; // in minutes
   completedAt?: number;
+  mode: 'queue' | 'scheduled';
+  scheduledTime?: string; // HH:mm format
+  scheduledDate?: string; // YYYY-MM-DD format
 }
 
 export interface HistoryEntry {

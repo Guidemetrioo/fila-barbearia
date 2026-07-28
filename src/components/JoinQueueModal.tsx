@@ -22,6 +22,12 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
   const [showAddDep, setShowAddDep] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [entryMode, setEntryMode] = useState<'queue' | 'scheduled'>('queue');
+  const [scheduledTime, setScheduledTime] = useState('');
+  const [scheduledDate, setScheduledDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
 
   if (!isOpen) return null;
 
@@ -107,12 +113,18 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
 
   const handleSubmit = () => {
     setError('');
+    if (entryMode === 'scheduled' && !scheduledTime) {
+      setError('Selecione o horário do agendamento.');
+      return;
+    }
     addToQueue(
       name.trim(),
       whatsapp,
       selectedServices,
       selectedBarberId === 'any' ? undefined : selectedBarberId,
-      dependents
+      dependents,
+      entryMode === 'scheduled' ? scheduledTime : undefined,
+      entryMode === 'scheduled' ? scheduledDate : undefined
     );
     setSuccess(true);
     setTimeout(() => {
@@ -132,6 +144,8 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
     setShowAddDep(false);
     setError('');
     setSuccess(false);
+    setEntryMode('queue');
+    setScheduledTime('');
     onClose();
   };
 
@@ -154,12 +168,16 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
       <div className="modal-overlay" onClick={handleClose}>
         <div className="modal-content modal-content--center" onClick={e => e.stopPropagation()}>
           <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎉</div>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>{entryMode === 'scheduled' ? '📅' : '🎉'}</div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--gold)' }}>
-              Sua vaga na fila foi garantida!
+              {entryMode === 'scheduled'
+                ? `Horário agendado para ${scheduledTime}!`
+                : 'Sua vaga na fila foi garantida!'}
             </h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-              Acompanhe sua posição no painel principal ou pela aba "Minha Conta".
+              {entryMode === 'scheduled'
+                ? 'Você está na fila para o horário marcado. Acompanhe pelo painel.'
+                : 'Acompanhe sua posição no painel principal ou pela aba "Minha Conta".'}
             </p>
           </div>
         </div>
@@ -178,7 +196,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
               {step === 3 && '3. Selecione os Serviços'}
               {step === 4 && '4. Confirmação & Dependentes'}
             </h3>
-            <p className="modal__subtitle">{config.name} • Atendimento por Ordem de Chegada</p>
+            <p className="modal__subtitle">{config.name} • {entryMode === 'scheduled' ? 'Agendamento com Horário' : 'Atendimento por Ordem de Chegada'}</p>
           </div>
           <button className="modal__close" onClick={handleClose}>✕</button>
         </div>
@@ -199,9 +217,39 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
           </div>
         )}
 
-        {/* Step 1: Dados do Cliente */}
+        {/* Step 1: Dados do Cliente + Modo */}
         {step === 1 && (
           <>
+            {/* Mode Toggle */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
+              <button
+                className={`btn ${entryMode === 'queue' ? 'btn-gold' : 'btn-outline'}`}
+                onClick={() => setEntryMode('queue')}
+                style={{ flex: 1, justifyContent: 'center', padding: '0.65rem' }}
+              >
+                ⚡ Entrar na Fila
+              </button>
+              <button
+                className={`btn ${entryMode === 'scheduled' ? 'btn-gold' : 'btn-outline'}`}
+                onClick={() => setEntryMode('scheduled')}
+                style={{ flex: 1, justifyContent: 'center', padding: '0.65rem' }}
+              >
+                📅 Marcar Horário
+              </button>
+            </div>
+
+            {entryMode === 'queue' && (
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem', textAlign: 'center', padding: '0.5rem', background: 'rgba(34,197,94,0.06)', borderRadius: '0.5rem', border: '1px solid rgba(34,197,94,0.15)' }}>
+                ⚡ Você entrará na fila e será atendido assim que o barbeiro estiver disponível.
+              </p>
+            )}
+
+            {entryMode === 'scheduled' && (
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1rem', textAlign: 'center', padding: '0.5rem', background: 'rgba(251,177,35,0.06)', borderRadius: '0.5rem', border: '1px solid rgba(251,177,35,0.15)' }}>
+                📅 Escolha a data e horário. Você ficará na fila no horário marcado.
+              </p>
+            )}
+
             <div className="form-group">
               <label className="form-label">
                 Seu Nome Completo <span>*</span>
@@ -228,6 +276,39 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
                 maxLength={16}
               />
             </div>
+
+            {/* Scheduling fields */}
+            {entryMode === 'scheduled' && (
+              <>
+                <div className="form-group">
+                  <label className="form-label">
+                    📅 Data <span>*</span>
+                  </label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={scheduledDate}
+                    onChange={e => setScheduledDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">
+                    🕐 Horário <span>*</span>
+                  </label>
+                  <input
+                    type="time"
+                    className="form-input"
+                    value={scheduledTime}
+                    onChange={e => setScheduledTime(e.target.value)}
+                    min="09:00"
+                    max="20:00"
+                    step="1800"
+                  />
+                </div>
+              </>
+            )}
+
             <button className="btn btn-gold btn-large" onClick={handleStep1}>
               Avançar →
             </button>
@@ -361,6 +442,12 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
                 <p><strong>Cliente:</strong> {name} ({whatsapp})</p>
                 <p><strong>Profissional:</strong> {barbers.find(b => b.id === selectedBarberId)?.name || 'Sem preferência (Mais rápido)'}</p>
                 <p><strong>Serviços:</strong> {selectedServices.map(s => s.name).join(', ')}</p>
+                {entryMode === 'scheduled' && (
+                  <p style={{ color: 'var(--gold)' }}><strong>📅 Agendado para:</strong> {scheduledDate.split('-').reverse().join('/')} às {scheduledTime}</p>
+                )}
+                {entryMode === 'queue' && (
+                  <p style={{ color: 'var(--green-text)' }}><strong>⚡ Modo:</strong> Fila — atendimento imediato por ordem de chegada</p>
+                )}
               </div>
 
               {/* Dependents list */}
@@ -487,7 +574,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
                 Voltar
               </button>
               <button className="btn btn-gold" onClick={handleSubmit} style={{ flex: 2, justifyContent: 'center' }}>
-                🚀 Entrar na Fila
+                {entryMode === 'scheduled' ? '📅 Confirmar Agendamento' : '🚀 Entrar na Fila'}
               </button>
             </div>
           </>

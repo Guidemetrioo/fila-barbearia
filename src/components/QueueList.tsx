@@ -61,7 +61,7 @@ export default function QueueList({ filterBarberId }: QueueListProps) {
           ))}
 
           {waitingEntries.map(entry => (
-            <div key={entry.id} className="queue-list__item">
+            <div key={entry.id} className={`queue-list__item ${entry.mode === 'scheduled' ? 'queue-list__item--scheduled' : ''}`}>
               <div className="queue-list__item-left">
                 <div className="queue-list__item-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2">
@@ -87,7 +87,13 @@ export default function QueueList({ filterBarberId }: QueueListProps) {
                 </div>
               </div>
               <div className="queue-list__item-wait">
-                <div>~{entry.estimatedWait} min</div>
+                {entry.mode === 'scheduled' && entry.scheduledTime ? (
+                  <div className="queue-list__item-badge queue-list__item-badge--scheduled">
+                    📅 {entry.scheduledTime}
+                  </div>
+                ) : (
+                  <div>~{entry.estimatedWait} min</div>
+                )}
               </div>
             </div>
           ))}

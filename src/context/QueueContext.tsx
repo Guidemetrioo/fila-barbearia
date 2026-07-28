@@ -15,7 +15,9 @@ interface QueueContextType {
     whatsapp: string,
     selectedServices: Service[],
     barberId?: string,
-    dependents?: Dependent[]
+    dependents?: Dependent[],
+    scheduledTime?: string,
+    scheduledDate?: string
   ) => void;
   removeFromQueue: (id: string) => void;
   callClient: (entryId: string, barberId: string) => void;
@@ -158,12 +160,15 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       whatsapp: string,
       selectedServices: Service[],
       barberId?: string,
-      dependents?: Dependent[]
+      dependents?: Dependent[],
+      scheduledTime?: string,
+      scheduledDate?: string
     ) => {
       const waitingCount = queue.filter(e => e.status === 'waiting').length;
       const position = waitingCount + 1;
 
       const chosenBarber = barbers.find(b => b.id === barberId);
+      const isScheduled = !!scheduledTime;
 
       const newEntry: QueueEntry = {
         id: `entry-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -176,7 +181,10 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         status: 'waiting',
         position,
         joinedAt: Date.now(),
-        estimatedWait: calculateEstimatedWait(position, barberId),
+        estimatedWait: isScheduled ? 0 : calculateEstimatedWait(position, barberId),
+        mode: isScheduled ? 'scheduled' : 'queue',
+        scheduledTime: scheduledTime || undefined,
+        scheduledDate: scheduledDate || undefined,
       };
 
       setQueue(prev => [...prev, newEntry]);

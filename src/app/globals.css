@@ -770,6 +770,22 @@ input {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Scheduled queue items */
+.queue-list__item--scheduled {
+  border-left: 3px solid var(--gold);
+}
+
+.queue-list__item-badge--scheduled {
+  background: rgba(251, 177, 35, 0.12);
+  color: var(--gold);
+  border: 1px solid var(--border-gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
 
 /* ==========================================
    JOIN QUEUE MODAL
