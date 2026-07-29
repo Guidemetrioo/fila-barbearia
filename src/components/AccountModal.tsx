@@ -100,12 +100,19 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
             <div className="account-info__position" style={{ marginTop: '0.5rem', fontSize: '1.2rem' }}>
               {entry.status === 'being-served' ? (
                 <span style={{ color: 'var(--gold)' }}>✂️ Você está sendo atendido!</span>
+              ) : entry.mode === 'scheduled' ? (
+                <span style={{ color: 'var(--gold)' }}>📅 Horário Agendado</span>
               ) : (
                 <span>Sua Posição: <strong>#{entry.position}º na fila</strong></span>
               )}
             </div>
 
             <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+              {entry.mode === 'scheduled' && (
+                <p style={{ color: 'var(--gold-light)', fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.4rem' }}>
+                  📅 Data & Horário: {entry.scheduledDate ? entry.scheduledDate.split('-').reverse().join('/') : 'Hoje'} às {entry.scheduledTime}
+                </p>
+              )}
               <p><strong>Profissional:</strong> {entry.barberName || 'Sem preferência (Qualquer barbeiro)'}</p>
               <p><strong>Seus Serviços:</strong> {(entry.services || []).map(s => s?.name).filter(Boolean).join(', ')}</p>
               {entry.dependents && entry.dependents.length > 0 && (
@@ -115,17 +122,25 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
                 </p>
               )}
               <p style={{ color: 'var(--gold)', fontWeight: 700, marginTop: '0.4rem' }}>
-                Total: R$ {totalPrice.toFixed(2)}
+                Total: R$ {totalPrice.toFixed(2).replace('.', ',')}
               </p>
             </div>
 
-            {entry.status === 'waiting' && (
+            {entry.status === 'waiting' && entry.mode === 'queue' && (
               <div style={{ marginTop: '1rem', background: 'var(--card-bg-soft)', padding: '0.75rem', borderRadius: '0.5rem' }}>
                 <div className="account-info__wait" style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--gold)' }}>
                   ~{entry.estimatedWait} min
                 </div>
                 <div className="account-info__wait-label" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                   Tempo estimado até o atendimento
+                </div>
+              </div>
+            )}
+
+            {entry.status === 'waiting' && entry.mode === 'scheduled' && (
+              <div style={{ marginTop: '1rem', background: 'rgba(251,177,35,0.08)', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-gold)' }}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--gold)', fontWeight: 600 }}>
+                  ⏰ Compareça à barbearia próximo ao horário reservado ({entry.scheduledTime}).
                 </div>
               </div>
             )}

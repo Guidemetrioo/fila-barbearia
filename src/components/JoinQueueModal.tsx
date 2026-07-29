@@ -10,7 +10,7 @@ interface JoinQueueModalProps {
 }
 
 export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps) {
-  const { services, barbers, addToQueue, config, getBarberWaitTime } = useQueue();
+  const { services, barbers, queue, addToQueue, config, getBarberWaitTime } = useQueue();
   const [step, setStep] = useState<number>(1);
   const [name, setName] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -399,15 +399,48 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
             <div className="schedule-section">
               <label className="schedule-label">HORÁRIOS DISPONÍVEIS</label>
               <div className="schedule-time-grid">
-                {timeSlots.map(time => (
-                  <button
-                    key={time}
-                    className={`schedule-time-slot ${scheduledTime === time ? 'active' : ''}`}
-                    onClick={() => setScheduledTime(time)}
-                  >
-                    {time}
-                  </button>
-                ))}
+                {timeSlots.map(time => {
+                  const todayStr = new Date().toISOString().split('T')[0];
+                  let isPast = false;
+                  if (scheduledDate === todayStr) {
+                    const [slotHour, slotMin] = time.split(':').map(Number);
+                    const now = new Date();
+                    if (slotHour < now.getHours() || (slotHour === now.getHours() && slotMin <= now.getMinutes())) {
+                      isPast = true;
+                    }
+                  }
+                  const isBooked = queue.some(
+                    e =>
+                      e.status === 'waiting' &&
+                      e.mode === 'scheduled' &&
+                      e.scheduledDate === scheduledDate &&
+                      e.scheduledTime === time &&
+                      (selectedBarberId === 'any' || !e.barberId || e.barberId === selectedBarberId)
+                  );
+                  const isAvailable = !isPast && !isBooked;
+                  const isSelected = scheduledTime === time;
+
+                  return (
+                    <button
+                      key={time}
+                      disabled={!isAvailable}
+                      className={`schedule-time-slot ${isSelected ? 'active' : ''}`}
+                      onClick={() => setScheduledTime(time)}
+                      style={{
+                        opacity: !isAvailable ? 0.4 : 1,
+                        cursor: !isAvailable ? 'not-allowed' : 'pointer',
+                        borderColor: !isAvailable ? 'rgba(255,255,255,0.08)' : undefined,
+                      }}
+                    >
+                      {time}
+                      {!isAvailable && (
+                        <span style={{ display: 'block', fontSize: '0.65rem', color: isPast ? '#9ca3af' : '#ef4444', fontWeight: 600 }}>
+                          {isPast ? 'Passou' : 'Ocupado'}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

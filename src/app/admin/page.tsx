@@ -354,6 +354,11 @@ export default function AdminPage() {
                     <div className="admin-queue-item__info">
                       <div className="admin-queue-item__name">
                         <span style={{ color: 'var(--gold)', fontWeight: 800 }}>#{entry.position}</span> {entry.clientName}
+                        {entry.mode === 'scheduled' && entry.scheduledTime && (
+                          <span style={{ background: 'var(--gold-glow)', color: 'var(--gold)', border: '1px solid var(--border-gold)', borderRadius: '4px', padding: '1px 6px', fontSize: '0.7rem', fontWeight: 700, marginLeft: '6px' }}>
+                            📅 {entry.scheduledTime} {entry.scheduledDate ? `(${entry.scheduledDate.split('-').reverse().join('/')})` : ''}
+                          </span>
+                        )}
                         {entry.dependents && entry.dependents.length > 0 && (
                           <span style={{ fontSize: '0.7rem', color: 'var(--amber)' }}> (+{entry.dependents.length})</span>
                         )}
