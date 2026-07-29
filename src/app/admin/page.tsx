@@ -74,6 +74,15 @@ export default function AdminPage() {
   // Today's history
   const todayHistory = useMemo(() => history.filter(h => isToday(h.completedAt)), [history]);
 
+  // CRM Metrics Today
+  const totalCutsToday = todayHistory.length;
+  const totalRevenueToday = todayHistory.reduce((sum, h) => sum + h.totalPrice, 0);
+  const pendingRevenue = waitingEntries.reduce(
+    (sum, e) => sum + e.services.reduce((s, sv) => s + sv.price, 0) + (e.dependents || []).reduce((s, d) => s + d.services.reduce((ds, sv) => ds + sv.price, 0), 0), 0
+  ) + servingEntries.reduce(
+    (sum, e) => sum + e.services.reduce((s, sv) => s + sv.price, 0) + (e.dependents || []).reduce((s, d) => s + d.services.reduce((ds, sv) => ds + sv.price, 0), 0), 0
+  );
+
   // Revenue per barber for today
   const todayRevenuePerBarber = useMemo(() => {
     const map: Record<string, { name: string; revenue: number; cuts: number }> = {};
@@ -214,6 +223,48 @@ export default function AdminPage() {
       {/* ROW 4: DASHBOARD TAB CONTENT */}
       {activeTab === 'dashboard' && (
         <>
+          {/* KPI Metrics Cards Grid (Ticket Médio Removed) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div className="section-card" style={{ padding: '1rem 0.85rem', textAlign: 'center', margin: 0 }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gold)' }}>{totalCutsToday}</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}>
+                CORTES HOJE
+              </div>
+            </div>
+
+            <div className="section-card" style={{ padding: '1rem 0.85rem', textAlign: 'center', margin: 0 }}>
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--gold)', whiteSpace: 'nowrap' }}>
+                R$ {totalRevenueToday.toFixed(0)}
+              </div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}>
+                FATURAMENTO HOJE
+              </div>
+            </div>
+
+            <div className="section-card" style={{ padding: '1rem 0.85rem', textAlign: 'center', margin: 0 }}>
+              <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--gold)', whiteSpace: 'nowrap' }}>
+                R$ {pendingRevenue.toFixed(0)}
+              </div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}>
+                RECEITA PENDENTE
+              </div>
+            </div>
+
+            <div className="section-card" style={{ padding: '1rem 0.85rem', textAlign: 'center', margin: 0 }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gold)' }}>{waitingEntries.length}</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}>
+                NA FILA
+              </div>
+            </div>
+
+            <div className="section-card" style={{ padding: '1rem 0.85rem', textAlign: 'center', margin: 0 }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gold)' }}>{servingEntries.length}</div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.25rem' }}>
+                ATENDENDO
+              </div>
+            </div>
+          </div>
+
           {/* SECTION 1: Faturamento por Barbeiro — Hoje */}
           <div className="section-card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
             <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
