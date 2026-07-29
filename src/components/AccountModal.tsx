@@ -53,9 +53,9 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
   };
 
   const totalPrice = entry
-    ? entry.services.reduce((sum, s) => sum + s.price, 0) +
+    ? (entry.services || []).reduce((sum, s) => sum + (s?.price || 0), 0) +
       (entry.dependents || []).reduce(
-        (sum, dep) => sum + dep.services.reduce((dSum, s) => dSum + s.price, 0),
+        (sum, dep) => sum + (dep?.services || []).reduce((dSum, s) => dSum + (s?.price || 0), 0),
         0
       )
     : 0;
@@ -107,11 +107,11 @@ export default function AccountModal({ isOpen, onClose }: AccountModalProps) {
 
             <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               <p><strong>Profissional:</strong> {entry.barberName || 'Sem preferência (Qualquer barbeiro)'}</p>
-              <p><strong>Seus Serviços:</strong> {entry.services.map(s => s.name).join(', ')}</p>
+              <p><strong>Seus Serviços:</strong> {(entry.services || []).map(s => s?.name).filter(Boolean).join(', ')}</p>
               {entry.dependents && entry.dependents.length > 0 && (
                 <p>
                   <strong>Acompanhantes:</strong>{' '}
-                  {entry.dependents.map(d => `${d.name} (${d.services.map(s => s.name).join(', ')})`).join('; ')}
+                  {entry.dependents.map(d => `${d.name} (${(d.services || []).map(s => s?.name).filter(Boolean).join(', ')})`).join('; ')}
                 </p>
               )}
               <p style={{ color: 'var(--gold)', fontWeight: 700, marginTop: '0.4rem' }}>

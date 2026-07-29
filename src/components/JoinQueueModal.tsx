@@ -550,7 +550,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
                 <p><strong>Profissional:</strong> {barbers.find(b => b.id === selectedBarberId)?.name || 'Sem preferência (Mais rápido)'}</p>
                 <p><strong>Serviços:</strong> {selectedServices.map(s => s.name).join(', ')}</p>
                 {entryMode === 'scheduled' && (
-                  <p style={{ color: 'var(--gold)' }}><strong>📅 Agendado para:</strong> {scheduledDate.split('-').reverse().join('/')} às {scheduledTime}</p>
+                  <p style={{ color: 'var(--gold)' }}><strong>📅 Agendado para:</strong> {scheduledDate ? scheduledDate.split('-').reverse().join('/') : ''} às {scheduledTime}</p>
                 )}
                 {entryMode === 'queue' && (
                   <p style={{ color: 'var(--green-text)' }}><strong>⚡ Modo:</strong> Fila — atendimento imediato por ordem de chegada</p>

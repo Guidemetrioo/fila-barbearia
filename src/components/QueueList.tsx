@@ -45,7 +45,7 @@ export default function QueueList({ filterBarberId }: QueueListProps) {
                 <div>
                   <div className="queue-list__item-name">{entry.clientName}</div>
                   <div className="queue-list__item-service">
-                    {entry.services.map(s => s.name).join(' + ')}
+                    {(entry.services || []).map(s => s?.name).filter(Boolean).join(' + ')}
                   </div>
                   {entry.barberName && (
                     <div className="queue-list__item-barber">
@@ -72,7 +72,7 @@ export default function QueueList({ filterBarberId }: QueueListProps) {
                 <div>
                   <div className="queue-list__item-name">{entry.clientName}</div>
                   <div className="queue-list__item-service">
-                    {entry.services.map(s => s.name).join(' + ')}
+                    {(entry.services || []).map(s => s?.name).filter(Boolean).join(' + ')}
                   </div>
                   {entry.barberName && (
                     <div className="queue-list__item-barber">

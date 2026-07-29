@@ -57,10 +57,29 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       const savedConfig = localStorage.getItem(STORAGE_KEYS.config);
       const savedHistory = localStorage.getItem(STORAGE_KEYS.history);
 
-      if (savedQueue) setQueue(JSON.parse(savedQueue));
+      if (savedQueue) {
+        const parsed = JSON.parse(savedQueue);
+        if (Array.isArray(parsed)) {
+          setQueue(parsed.map(e => ({
+            ...e,
+            services: Array.isArray(e?.services) ? e.services : [],
+            dependents: Array.isArray(e?.dependents) ? e.dependents : [],
+            mode: e?.mode || 'queue',
+          })));
+        }
+      }
       if (savedBarbers) setBarbers(JSON.parse(savedBarbers));
       if (savedConfig) setConfig({ ...defaultConfig, ...JSON.parse(savedConfig) });
-      if (savedHistory) setHistory(JSON.parse(savedHistory));
+      if (savedHistory) {
+        const parsedHist = JSON.parse(savedHistory);
+        if (Array.isArray(parsedHist)) {
+          setHistory(parsedHist.map(h => ({
+            ...h,
+            services: Array.isArray(h?.services) ? h.services : [],
+            dependents: Array.isArray(h?.dependents) ? h.dependents : [],
+          })));
+        }
+      }
     } catch (e) {
       console.error('Error loading from localStorage:', e);
     }
@@ -113,9 +132,9 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       );
 
       for (const entry of waiting) {
-        const clientDuration = entry.services.reduce((acc, s) => acc + s.duration, 0);
+        const clientDuration = (entry.services || []).reduce((acc, s) => acc + (s?.duration || 0), 0);
         const dependentsDuration = (entry.dependents || []).reduce(
-          (acc, dep) => acc + dep.services.reduce((dAcc, s) => dAcc + s.duration, 0),
+          (acc, dep) => acc + (dep?.services || []).reduce((dAcc, s) => dAcc + (s?.duration || 0), 0),
           0
         );
         totalMinutes += clientDuration + dependentsDuration;
@@ -249,19 +268,19 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       if (!entry) return;
 
       // Save to history
-      const totalPrice = entry.services.reduce((sum, s) => sum + s.price, 0) +
+      const totalPrice = (entry.services || []).reduce((sum, s) => sum + (s?.price || 0), 0) +
         (entry.dependents || []).reduce(
-          (sum, d) => sum + d.services.reduce((s, sv) => s + sv.price, 0), 0
+          (sum, d) => sum + (d?.services || []).reduce((s, sv) => s + (sv?.price || 0), 0), 0
         );
 
       const historyItem: HistoryEntry = {
         id: entry.id,
         clientName: entry.clientName,
         whatsapp: entry.whatsapp,
-        services: entry.services,
+        services: entry.services || [],
         barberId: entry.barberId || '',
         barberName: entry.barberName || '',
-        dependents: entry.dependents,
+        dependents: entry.dependents || [],
         joinedAt: entry.joinedAt,
         completedAt: Date.now(),
         totalPrice,

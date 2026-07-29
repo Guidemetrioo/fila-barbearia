@@ -91,7 +91,7 @@ export default function BarberCard({ barber, queueEntries, isFilterActive, onTog
           <div className="barber-card__serving-client">
             <span className="barber-card__client-name">{servingEntry.clientName}</span>
             <span className="barber-card__service-name">
-              ({servingEntry.services.map(s => s.name).join(', ')})
+              ({(servingEntry.services || []).map(s => s?.name).filter(Boolean).join(', ')})
             </span>
           </div>
         ) : (
