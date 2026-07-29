@@ -16,6 +16,41 @@ export default function BarberCard({ barber, queueEntries, isFilterActive, onTog
 
   const totalWait = getBarberWaitTime(barber.id);
   const isAvailable = barber.status === 'available';
+  const isBreak = barber.status === 'break';
+  
+  const remainingBreak = isBreak && barber.breakUntil
+    ? Math.max(0, Math.ceil((barber.breakUntil - Date.now()) / 60000))
+    : 0;
+
+  const statusBg = isAvailable
+    ? 'rgba(16, 185, 129, 0.14)'
+    : isBreak
+    ? 'rgba(245, 158, 11, 0.14)'
+    : 'rgba(239, 68, 68, 0.14)';
+
+  const statusColor = isAvailable
+    ? '#34D399'
+    : isBreak
+    ? '#FBBF24'
+    : '#F87171';
+
+  const statusBorder = isAvailable
+    ? 'rgba(16, 185, 129, 0.3)'
+    : isBreak
+    ? 'rgba(245, 158, 11, 0.3)'
+    : 'rgba(239, 68, 68, 0.3)';
+
+  const statusDotColor = isAvailable
+    ? '#10B981'
+    : isBreak
+    ? '#F59E0B'
+    : '#EF4444';
+
+  const statusLabel = isAvailable
+    ? 'Disponível'
+    : isBreak
+    ? `Em pausa ${remainingBreak > 0 ? `(${remainingBreak} min)` : ''}`
+    : 'Indisponível';
 
   return (
     <div
@@ -55,7 +90,7 @@ export default function BarberCard({ barber, queueEntries, isFilterActive, onTog
             width: 12,
             height: 12,
             borderRadius: '50%',
-            backgroundColor: isAvailable ? '#10B981' : '#EF4444',
+            backgroundColor: statusDotColor,
             border: '2px solid #071710',
           }}
         />
@@ -66,28 +101,28 @@ export default function BarberCard({ barber, queueEntries, isFilterActive, onTog
         {barber.name}
       </h4>
 
-      {/* Status Badge: Disponível / Indisponível */}
+      {/* Status Badge */}
       <div style={{
         fontSize: '0.7rem',
         fontWeight: 700,
         padding: '0.15rem 0.6rem',
         borderRadius: '10px',
-        background: isAvailable ? 'rgba(16, 185, 129, 0.14)' : 'rgba(239, 68, 68, 0.14)',
-        color: isAvailable ? '#34D399' : '#F87171',
-        border: `1px solid ${isAvailable ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+        background: statusBg,
+        color: statusColor,
+        border: `1px solid ${statusBorder}`,
         marginBottom: '0.45rem',
       }}>
-        {isAvailable ? 'Disponível' : 'Indisponível'}
+        {statusLabel}
       </div>
 
-      {/* Wait Time: Tempo estimado: Livre / Tempo estimado: X minutos */}
+      {/* Wait Time */}
       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap' }}>
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
         <span>
-          Tempo estimado: {totalWait === 0 ? 'Livre' : `${totalWait} minutos`}
+          Tempo estimado: {isBreak ? (remainingBreak > 0 ? `${remainingBreak} min (Pausa)` : 'Pausa') : (totalWait === 0 ? 'Livre' : `${totalWait} minutos`)}
         </span>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useQueue } from '@/context/QueueContext';
-import { Service } from '@/types';
+import { Service, Barber } from '@/types';
 
 const ADMIN_PASSWORD = 'delrey2024';
 
@@ -37,6 +37,24 @@ export default function AdminPage() {
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [editPrice, setEditPrice] = useState<string>('');
   const [editDuration, setEditDuration] = useState<string>('');
+
+  // Pause Duration Modal State
+  const [pausingBarber, setPausingBarber] = useState<Barber | null>(null);
+  const [pauseMinutesInput, setPauseMinutesInput] = useState<string>('30');
+
+  const handleOpenPauseModal = (barber: Barber) => {
+    setPausingBarber(barber);
+    setPauseMinutesInput('30');
+  };
+
+  const handleConfirmPause = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!pausingBarber) return;
+    const mins = parseInt(pauseMinutesInput, 10);
+    const validMins = isNaN(mins) || mins <= 0 ? 30 : mins;
+    setBarberStatus(pausingBarber.id, 'break', validMins);
+    setPausingBarber(null);
+  };
 
   const handleOpenEditService = (svc: Service) => {
     setEditingService(svc);
@@ -422,6 +440,10 @@ export default function AdminPage() {
               {barbers.map(barber => {
                 const stats = barberStatsMap[barber.id] || { revenue: 0, cuts: 0 };
                 const percent = (stats.revenue / maxRevenue) * 100;
+                const remainingBreak = barber.status === 'break' && barber.breakUntil
+                  ? Math.max(0, Math.ceil((barber.breakUntil - now) / 60000))
+                  : 0;
+
                 return (
                   <div
                     key={barber.id}
@@ -460,14 +482,18 @@ export default function AdminPage() {
                       border: `1px solid ${barber.status === 'available' ? 'rgba(16, 185, 129, 0.3)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
                       marginBottom: '0.85rem',
                     }}>
-                      {barber.status === 'available' ? 'Livre' : barber.status === 'busy' ? 'Atendendo' : 'Em pausa'}
+                      {barber.status === 'available'
+                        ? 'Livre'
+                        : barber.status === 'busy'
+                        ? 'Atendendo'
+                        : `Em pausa ${remainingBreak > 0 ? `(${remainingBreak} min)` : ''}`}
                     </div>
 
                     <div style={{ width: '100%', marginBottom: '1.1rem' }}>
                       {barber.status !== 'break' ? (
                         <button
                           className="btn btn-outline"
-                          onClick={() => setBarberStatus(barber.id, 'break')}
+                          onClick={() => handleOpenPauseModal(barber)}
                           style={{
                             width: '100%',
                             justifyContent: 'center',
@@ -861,6 +887,131 @@ export default function AdminPage() {
                   style={{ flex: 1, justifyContent: 'center' }}
                 >
                   Salvar Alterações
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======== PAUSE DURATION MODAL ======== */}
+      {pausingBarber && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem',
+        }}>
+          <div style={{
+            background: '#071710',
+            border: '1px solid var(--gold)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            maxWidth: '420px',
+            width: '100%',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--gold)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Tempo de Pausa — {pausingBarber.name}
+              </h3>
+              <button
+                onClick={() => setPausingBarber(null)}
+                style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '1.25rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmPause}>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#CBD5E1', marginBottom: '0.6rem' }}>
+                  Defina o tempo que ficará fora (em minutos):
+                </label>
+
+                {/* Quick selector pills */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.85rem' }}>
+                  {['15', '30', '45', '60'].map(mins => (
+                    <button
+                      type="button"
+                      key={mins}
+                      onClick={() => setPauseMinutesInput(mins)}
+                      style={{
+                        padding: '0.45rem',
+                        borderRadius: '8px',
+                        border: pauseMinutesInput === mins ? '2px solid var(--gold)' : '1px solid rgba(255,255,255,0.1)',
+                        background: pauseMinutesInput === mins ? 'rgba(212,175,55,0.15)' : 'rgba(255,255,255,0.03)',
+                        color: pauseMinutesInput === mins ? 'var(--gold)' : '#F8FAFC',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {mins} min
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="number"
+                    min="1"
+                    max="480"
+                    value={pauseMinutesInput}
+                    onChange={e => setPauseMinutesInput(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(212, 175, 55, 0.4)',
+                      borderRadius: '8px',
+                      color: '#F8FAFC',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                    }}
+                    required
+                  />
+                  <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--gold)', fontWeight: 700, fontSize: '0.85rem' }}>
+                    minutos
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setPausingBarber(null)}
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '8px',
+                    color: '#94A3B8',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-gold"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                >
+                  Confirmar Pausa
                 </button>
               </div>
             </form>

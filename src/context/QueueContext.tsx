@@ -26,7 +26,7 @@ interface QueueContextType {
   finishClient: (entryId: string) => void;
   toggleShopOpen: () => void;
   toggleQueueOpen: () => void;
-  setBarberStatus: (barberId: string, status: Barber['status']) => void;
+  setBarberStatus: (barberId: string, status: Barber['status'], breakMinutes?: number) => void;
   getClientEntry: (whatsapp: string) => QueueEntry | undefined;
   cancelEntry: (id: string) => void;
   getBarberQueue: (barberId: string) => QueueEntry[];
@@ -399,10 +399,17 @@ export function QueueProvider({ children }: { children: ReactNode }) {
     writeConfigToFirebase(newConfig);
   }, [config, writeConfigToFirebase]);
 
-  const setBarberStatus = useCallback((barberId: string, status: Barber['status']) => {
+  const setBarberStatus = useCallback((barberId: string, status: Barber['status'], breakMinutes?: number) => {
+    const breakUntil = status === 'break' && breakMinutes ? Date.now() + breakMinutes * 60 * 1000 : undefined;
     const updatedBarbers = barbers.map(b =>
       b.id === barberId
-        ? { ...b, status, currentClient: status === 'available' ? undefined : b.currentClient }
+        ? {
+            ...b,
+            status,
+            currentClient: status === 'available' ? undefined : b.currentClient,
+            breakUntil: status === 'break' ? breakUntil : undefined,
+            breakMinutes: status === 'break' ? breakMinutes : undefined,
+          }
         : b
     );
     writeBarbersToFirebase(updatedBarbers);

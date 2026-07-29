@@ -4,6 +4,8 @@ export interface Barber {
   avatar: string;
   status: 'available' | 'busy' | 'break' | 'offline';
   currentClient?: string;
+  breakUntil?: number;
+  breakMinutes?: number;
 }
 
 export interface Service {
