@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Barber, QueueEntry, Service, ShopConfig, Dependent, HistoryEntry } from '@/types';
 import { shopConfig as defaultConfig, initialBarbers, services as defaultServices } from '@/data/shopConfig';
+import { database } from '@/lib/firebase';
+import { ref, onValue, set, push, update, remove } from 'firebase/database';
 
 interface QueueContextType {
   config: ShopConfig;
@@ -36,11 +38,12 @@ interface QueueContextType {
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
 
-const STORAGE_KEYS = {
-  queue: 'delrey_queue',
-  barbers: 'delrey_barbers',
-  config: 'delrey_config',
-  history: 'delrey_history',
+// Firebase database paths
+const DB_PATHS = {
+  queue: 'queue',
+  barbers: 'barbers',
+  config: 'config',
+  history: 'history',
 };
 
 export function QueueProvider({ children }: { children: ReactNode }) {
@@ -51,63 +54,101 @@ export function QueueProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
+  // ===== FIREBASE REAL-TIME LISTENERS =====
+  // These listeners auto-update state whenever ANY device writes to Firebase
   useEffect(() => {
-    try {
-      const savedQueue = localStorage.getItem(STORAGE_KEYS.queue);
-      const savedBarbers = localStorage.getItem(STORAGE_KEYS.barbers);
-      const savedConfig = localStorage.getItem(STORAGE_KEYS.config);
-      const savedHistory = localStorage.getItem(STORAGE_KEYS.history);
+    // Listen to queue changes
+    const queueRef = ref(database, DB_PATHS.queue);
+    const unsubQueue = onValue(queueRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // Firebase stores objects, convert to array
+        const entries: QueueEntry[] = Object.values(data);
+        // Ensure data integrity
+        const sanitized = entries.map(e => ({
+          ...e,
+          services: Array.isArray(e?.services) ? e.services : [],
+          dependents: Array.isArray(e?.dependents) ? e.dependents : [],
+          mode: e?.mode || 'queue' as const,
+        }));
+        setQueue(sanitized);
+      } else {
+        setQueue([]);
+      }
+    });
 
-      if (savedQueue) {
-        const parsed = JSON.parse(savedQueue);
-        if (Array.isArray(parsed)) {
-          setQueue(parsed.map(e => ({
-            ...e,
-            services: Array.isArray(e?.services) ? e.services : [],
-            dependents: Array.isArray(e?.dependents) ? e.dependents : [],
-            mode: e?.mode || 'queue',
-          })));
-        }
+    // Listen to barbers changes
+    const barbersRef = ref(database, DB_PATHS.barbers);
+    const unsubBarbers = onValue(barbersRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const barbersList: Barber[] = Object.values(data);
+        setBarbers(barbersList);
       }
-      if (savedBarbers) setBarbers(JSON.parse(savedBarbers));
-      if (savedConfig) setConfig({ ...defaultConfig, ...JSON.parse(savedConfig), name: defaultConfig.name });
-      if (savedHistory) {
-        const parsedHist = JSON.parse(savedHistory);
-        if (Array.isArray(parsedHist)) {
-          setHistory(parsedHist.map(h => ({
-            ...h,
-            services: Array.isArray(h?.services) ? h.services : [],
-            dependents: Array.isArray(h?.dependents) ? h.dependents : [],
-          })));
-        }
+      // If no data in Firebase yet, keep defaults (will be written on first action)
+    });
+
+    // Listen to config changes
+    const configRef = ref(database, DB_PATHS.config);
+    const unsubConfig = onValue(configRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setConfig({ ...defaultConfig, ...data, name: defaultConfig.name });
       }
-    } catch (e) {
-      console.error('Error loading from localStorage:', e);
-    }
+    });
+
+    // Listen to history changes
+    const historyRef = ref(database, DB_PATHS.history);
+    const unsubHistory = onValue(historyRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const entries: HistoryEntry[] = Object.values(data);
+        const sanitized = entries.map(h => ({
+          ...h,
+          services: Array.isArray(h?.services) ? h.services : [],
+          dependents: Array.isArray(h?.dependents) ? h.dependents : [],
+        }));
+        // Sort by completedAt descending (newest first)
+        sanitized.sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+        setHistory(sanitized);
+      } else {
+        setHistory([]);
+      }
+    });
+
     setIsLoaded(true);
+
+    // Cleanup listeners on unmount
+    return () => {
+      unsubQueue();
+      unsubBarbers();
+      unsubConfig();
+      unsubHistory();
+    };
   }, []);
 
-  // Persist to localStorage on changes
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem(STORAGE_KEYS.queue, JSON.stringify(queue));
-  }, [queue, isLoaded]);
+  // ===== HELPER: Write full queue to Firebase =====
+  const writeQueueToFirebase = useCallback((entries: QueueEntry[]) => {
+    const queueObj: Record<string, QueueEntry> = {};
+    for (const entry of entries) {
+      queueObj[entry.id] = entry;
+    }
+    set(ref(database, DB_PATHS.queue), queueObj);
+  }, []);
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem(STORAGE_KEYS.barbers, JSON.stringify(barbers));
-  }, [barbers, isLoaded]);
+  // ===== HELPER: Write barbers to Firebase =====
+  const writeBarbersToFirebase = useCallback((barbersList: Barber[]) => {
+    const barbersObj: Record<string, Barber> = {};
+    for (const barber of barbersList) {
+      barbersObj[barber.id] = barber;
+    }
+    set(ref(database, DB_PATHS.barbers), barbersObj);
+  }, []);
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem(STORAGE_KEYS.config, JSON.stringify(config));
-  }, [config, isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(history));
-  }, [history, isLoaded]);
+  // ===== HELPER: Write config to Firebase =====
+  const writeConfigToFirebase = useCallback((newConfig: ShopConfig) => {
+    set(ref(database, DB_PATHS.config), newConfig);
+  }, []);
 
   const getBarberQueue = useCallback(
     (barberId: string) => {
@@ -175,6 +216,8 @@ export function QueueProvider({ children }: { children: ReactNode }) {
     [calculateEstimatedWait]
   );
 
+  // ===== ACTIONS: All write to Firebase instead of localStorage =====
+
   const addToQueue = useCallback(
     (
       clientName: string,
@@ -208,60 +251,57 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         scheduledDate: scheduledDate || undefined,
       };
 
-      setQueue(prev => [...prev, newEntry]);
+      // Write to Firebase — all devices will receive this via onValue listener
+      const newQueue = [...queue, newEntry];
+      writeQueueToFirebase(newQueue);
     },
-    [queue, barbers, calculateEstimatedWait]
+    [queue, barbers, calculateEstimatedWait, writeQueueToFirebase]
   );
 
   const removeFromQueue = useCallback(
     (id: string) => {
-      setQueue(prev => {
-        const updated = prev.filter(e => e.id !== id);
-        return recalculatePositions(updated);
-      });
+      const updated = queue.filter(e => e.id !== id);
+      const recalculated = recalculatePositions(updated);
+      writeQueueToFirebase(recalculated);
     },
-    [recalculatePositions]
+    [queue, recalculatePositions, writeQueueToFirebase]
   );
 
   const cancelEntry = useCallback(
     (id: string) => {
-      setQueue(prev => {
-        const updated = prev.map(e =>
-          e.id === id ? { ...e, status: 'cancelled' as const } : e
-        );
-        return recalculatePositions(updated.filter(e => e.status !== 'cancelled'));
-      });
+      const updated = queue.filter(e => e.id !== id);
+      const recalculated = recalculatePositions(updated);
+      writeQueueToFirebase(recalculated);
     },
-    [recalculatePositions]
+    [queue, recalculatePositions, writeQueueToFirebase]
   );
 
   const callClient = useCallback(
     (entryId: string, barberId: string) => {
       const barberObj = barbers.find(b => b.id === barberId);
-      setQueue(prev =>
-        recalculatePositions(
-          prev.map(e =>
-            e.id === entryId
-              ? {
-                  ...e,
-                  status: 'being-served' as const,
-                  barberId,
-                  barberName: barberObj?.name,
-                  position: 0,
-                }
-              : e
-          )
-        )
+
+      const updatedQueue = queue.map(e =>
+        e.id === entryId
+          ? {
+              ...e,
+              status: 'being-served' as const,
+              barberId,
+              barberName: barberObj?.name,
+              position: 0,
+            }
+          : e
       );
-      setBarbers(prev =>
-        prev.map(b =>
-          b.id === barberId
-            ? { ...b, status: 'busy' as const, currentClient: entryId }
-            : b
-        )
+      const recalculated = recalculatePositions(updatedQueue);
+      writeQueueToFirebase(recalculated);
+
+      const updatedBarbers = barbers.map(b =>
+        b.id === barberId
+          ? { ...b, status: 'busy' as const, currentClient: entryId }
+          : b
       );
+      writeBarbersToFirebase(updatedBarbers);
     },
-    [barbers, recalculatePositions]
+    [barbers, queue, recalculatePositions, writeQueueToFirebase, writeBarbersToFirebase]
   );
 
   const finishClient = useCallback(
@@ -269,7 +309,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       const entry = queue.find(e => e.id === entryId);
       if (!entry) return;
 
-      // Save to history
+      // Calculate total price
       const totalPrice = (entry.services || []).reduce((sum, s) => sum + (s?.price || 0), 0) +
         (entry.dependents || []).reduce(
           (sum, d) => sum + (d?.services || []).reduce((s, sv) => s + (sv?.price || 0), 0), 0
@@ -288,42 +328,48 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         totalPrice,
       };
 
-      setHistory(prev => [historyItem, ...prev]);
+      // Write history item to Firebase
+      const historyRef = ref(database, `${DB_PATHS.history}/${historyItem.id}`);
+      set(historyRef, historyItem);
 
+      // Update barber status
       if (entry.barberId) {
-        setBarbers(prev =>
-          prev.map(b =>
-            b.id === entry.barberId
-              ? { ...b, status: 'available' as const, currentClient: undefined }
-              : b
-          )
+        const updatedBarbers = barbers.map(b =>
+          b.id === entry.barberId
+            ? { ...b, status: 'available' as const, currentClient: undefined }
+            : b
         );
+        writeBarbersToFirebase(updatedBarbers);
       }
-      setQueue(prev => {
-        const updated = prev.filter(e => e.id !== entryId);
-        return recalculatePositions(updated);
-      });
+
+      // Remove from queue
+      const updatedQueue = queue.filter(e => e.id !== entryId);
+      const recalculated = recalculatePositions(updatedQueue);
+      writeQueueToFirebase(recalculated);
     },
-    [queue, recalculatePositions]
+    [queue, barbers, recalculatePositions, writeQueueToFirebase, writeBarbersToFirebase]
   );
 
   const toggleShopOpen = useCallback(() => {
-    setConfig(prev => ({ ...prev, isOpen: !prev.isOpen }));
-  }, []);
+    const newConfig = { ...config, isOpen: !config.isOpen };
+    setConfig(newConfig);
+    writeConfigToFirebase(newConfig);
+  }, [config, writeConfigToFirebase]);
 
   const toggleQueueOpen = useCallback(() => {
-    setConfig(prev => ({ ...prev, isQueueOpen: !prev.isQueueOpen }));
-  }, []);
+    const newConfig = { ...config, isQueueOpen: !config.isQueueOpen };
+    setConfig(newConfig);
+    writeConfigToFirebase(newConfig);
+  }, [config, writeConfigToFirebase]);
 
   const setBarberStatus = useCallback((barberId: string, status: Barber['status']) => {
-    setBarbers(prev =>
-      prev.map(b =>
-        b.id === barberId
-          ? { ...b, status, currentClient: status === 'available' ? undefined : b.currentClient }
-          : b
-      )
+    const updatedBarbers = barbers.map(b =>
+      b.id === barberId
+        ? { ...b, status, currentClient: status === 'available' ? undefined : b.currentClient }
+        : b
     );
-  }, []);
+    writeBarbersToFirebase(updatedBarbers);
+  }, [barbers, writeBarbersToFirebase]);
 
   const getClientEntry = useCallback(
     (whatsapp: string): QueueEntry | undefined => {
@@ -338,7 +384,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
   );
 
   const clearHistory = useCallback(() => {
-    setHistory([]);
+    set(ref(database, DB_PATHS.history), null);
   }, []);
 
   const loadDemoData = useCallback(() => {
@@ -406,15 +452,17 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       { id: 'barber-3', name: 'MATHEUS', avatar: '/images/barber3.png', status: 'available' },
     ];
 
-    setQueue(demoQueue);
-    setBarbers(demoBarbers);
-    setConfig(prev => ({ ...prev, isOpen: true, isQueueOpen: true }));
-  }, []);
+    writeQueueToFirebase(demoQueue);
+    writeBarbersToFirebase(demoBarbers);
+    const newConfig = { ...config, isOpen: true, isQueueOpen: true };
+    writeConfigToFirebase(newConfig);
+  }, [config, writeQueueToFirebase, writeBarbersToFirebase, writeConfigToFirebase]);
 
   const clearQueue = useCallback(() => {
-    setQueue([]);
-    setBarbers(prev => prev.map(b => ({ ...b, status: 'available', currentClient: undefined })));
-  }, []);
+    writeQueueToFirebase([]);
+    const resetBarbers = barbers.map(b => ({ ...b, status: 'available' as const, currentClient: undefined }));
+    writeBarbersToFirebase(resetBarbers);
+  }, [barbers, writeQueueToFirebase, writeBarbersToFirebase]);
 
   return (
     <QueueContext.Provider
