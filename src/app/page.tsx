@@ -43,14 +43,17 @@ export default function Home() {
 
         {/* Status Announcement Banner */}
         <div className="announcement-banner">
-          <div className="announcement-banner__item">✅ HORÁRIOS BASE PODEM TER ALTERAÇÕES ⚠️</div>
-          <div className="announcement-banner__item">⏰ FILA ABRE ÀS {config.queueOpenTime} 🔓</div>
-          <div className="announcement-banner__item">💈 BARBEARIA ABRE À PARTIR DAS {config.shopOpenTime} 🏁</div>
+          <div className="announcement-banner__item">
+            <span> Horários base sujeitos a pequenas alterações de tolerância</span>
+          </div>
+          <div className="announcement-banner__item">
+            <span> Fila abre às {config.queueOpenTime} | Atendimento a partir das {config.shopOpenTime}</span>
+          </div>
           <div
             className="announcement-banner__item announcement-banner__item--clickable"
             onClick={() => setShowAccountModal(true)}
           >
-            🚨 (Para CANCELAR clique em -&gt;] ENTRAR NA MINHA CONTA) 🚨
+            <span> Para CANCELAR ou consultar sua posição: clique em <strong>ENTRAR NA MINHA CONTA</strong></span>
           </div>
         </div>
 

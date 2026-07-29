@@ -23,12 +23,15 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
-        <meta name="theme-color" content="#FBB123" />
+        <meta name="theme-color" content="#d4af37" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Del Rey Fila" />
         <link rel="icon" href="/images/logo.png" type="image/png" />
         <link rel="apple-touch-icon" href="/images/logo.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body>
         <QueueProvider>{children}</QueueProvider>

@@ -6,33 +6,30 @@ export default function ShopInfo() {
   const { config } = useQueue();
 
   return (
-    <div className="section-card shop-info">
-      <p className="shop-info__alert">
-        ✅ HORÁRIOS BASE PODEM TER ALTERAÇÕES ⚠️
+    <div className="section-card shop-info" style={{ textAlign: 'center' }}>
+      <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--gold-light)', marginBottom: '0.85rem' }}>
+        Informações e Funcionamento
+      </h3>
+      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+        Fila abre às <strong>{config.queueOpenTime}</strong> | Atendimento a partir das <strong>{config.shopOpenTime}</strong>
       </p>
-      <p className="shop-info__time">
-        🕐 FILA ABRE ÀS {config.queueOpenTime} 📂
+      <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+        {config.workingDays}
       </p>
-      <p className="shop-info__time">
-        📍 BARBEARIA ABRE À PARTIR DAS {config.shopOpenTime} 💈
-      </p>
-      <p className="shop-info__time" style={{ marginTop: '0.75rem', fontSize: '0.8rem' }}>
-        📅 {config.workingDays}
-      </p>
+      
       <div style={{
-        marginTop: '1rem',
         paddingTop: '1rem',
-        borderTop: '1px solid var(--border-primary)',
+        borderTop: '1px solid var(--border-subtle)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '0.5rem',
+        gap: '0.6rem',
         alignItems: 'center',
       }}>
         <a
           href="https://www.google.com/maps/dir/?api=1&destination=Barbearia+Del+Rey,+R.+Sapucaia,+359+-+Belenzinho,+São+Paulo+-+SP&travelmode=driving"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}
+          style={{ fontSize: '0.85rem', color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 600 }}
         >
           📍 {config.address}
         </a>
@@ -41,22 +38,18 @@ export default function ShopInfo() {
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            fontSize: '0.8rem',
+            fontSize: '0.85rem',
             color: 'var(--green-text)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.25rem',
+            fontWeight: 700,
+            textDecoration: 'none',
           }}
         >
-          📱 {config.phone}
+          📱 WhatsApp: {config.phone}
         </a>
-        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-          💳 Crédito, Débito e NFC • 🚻 Banheiro • 👶 Bom para crianças
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+          💳 Crédito, Débito e Pix • 🚻 Ambiente Climatizado • ☕ Café & Wi-Fi
         </p>
       </div>
-      <p className="shop-info__cancel-note">
-        💇 ( Para CANCELAR clique em {'->'} ENTRAR NA MINHA CONTA ) 💇
-      </p>
     </div>
   );
 }
