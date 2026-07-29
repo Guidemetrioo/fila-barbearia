@@ -10,7 +10,6 @@ import QueueList from '@/components/QueueList';
 import ServicesSection from '@/components/ServicesSection';
 import JoinQueueModal from '@/components/JoinQueueModal';
 import AccountModal from '@/components/AccountModal';
-import RatingSection from '@/components/RatingSection';
 
 export default function Home() {
   const { config, barbers, queue } = useQueue();
@@ -98,10 +97,7 @@ export default function Home() {
         {/* 5. Fila de Espera Section */}
         <QueueList filterBarberId={filterBarberId} />
 
-        {/* 6. Avaliar Barbearia Section */}
-        <RatingSection />
-
-        {/* 7. Instagram & Informações do Estabelecimento */}
+        {/* 6. Instagram & Informações do Estabelecimento */}
         <ShopInfo />
       </main>
 
