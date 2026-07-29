@@ -14,122 +14,80 @@ interface BarberCardProps {
 export default function BarberCard({ barber, queueEntries, isFilterActive, onToggleFilter }: BarberCardProps) {
   const { getBarberWaitTime } = useQueue();
 
-  const servingEntry = queueEntries.find(
-    e => e.barberId === barber.id && e.status === 'being-served'
-  );
-
-  const barberQueue = queueEntries.filter(
-    e => e.status === 'waiting' && (e.barberId === barber.id || (!e.barberId && e.position === 1))
-  );
-
   const totalWait = getBarberWaitTime(barber.id);
-
-  const getStatusClass = () => {
-    switch (barber.status) {
-      case 'available': return 'barber-card--available';
-      case 'busy': return 'barber-card--busy';
-      case 'break':
-      case 'offline': return 'barber-card--offline';
-    }
-  };
-
-  const getStatusText = () => {
-    switch (barber.status) {
-      case 'available': return '🟢 Livre';
-      case 'busy': return '🔴 Atendendo';
-      case 'break': return '🟡 Em pausa';
-      case 'offline': return '⚪ Indisponível';
-    }
-  };
+  const isAvailable = barber.status === 'available';
 
   return (
     <div
-      className={`barber-card ${getStatusClass()} ${isFilterActive ? 'barber-card--filter-active' : ''}`}
+      className={`barber-card ${isAvailable ? 'barber-card--available' : 'barber-card--offline'} ${isFilterActive ? 'barber-card--filter-active' : ''}`}
       onClick={() => onToggleFilter?.(barber.id)}
-      style={{ cursor: onToggleFilter ? 'pointer' : 'default' }}
+      style={{
+        cursor: onToggleFilter ? 'pointer' : 'default',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        padding: '1rem 0.85rem',
+      }}
     >
-      {/* Filter indicator */}
+      {/* Filter indicator badge if filter is active */}
       {isFilterActive && (
-        <div className="barber-card__filter-badge">
-          🔍 Filtrando fila
+        <div className="barber-card__filter-badge" style={{ marginBottom: '0.5rem' }}>
+          Filtrando fila
         </div>
       )}
 
-      {/* Header */}
-      <div className="barber-card__header">
-        <div style={{ position: 'relative' }}>
-          <Image
-            src={barber.avatar}
-            alt={barber.name}
-            width={52}
-            height={52}
-            className="barber-card__avatar"
-          />
-          <span
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              backgroundColor: barber.status === 'available' ? '#22c55e' : barber.status === 'busy' ? '#ef4444' : '#6b7280',
-              border: '2px solid #18181b',
-            }}
-          />
-        </div>
-        <div>
-          <h4 className="barber-card__name">{barber.name}</h4>
-          <span className="barber-card__badge">{getStatusText()}</span>
-        </div>
+      {/* Avatar with status dot */}
+      <div style={{ position: 'relative', marginBottom: '0.65rem' }}>
+        <Image
+          src={barber.avatar}
+          alt={barber.name}
+          width={64}
+          height={64}
+          className="barber-card__avatar"
+          style={{ borderRadius: '50%', border: '2px solid var(--gold)', objectFit: 'cover' }}
+        />
+        <span
+          style={{
+            position: 'absolute',
+            bottom: 2,
+            right: 2,
+            width: 14,
+            height: 14,
+            borderRadius: '50%',
+            backgroundColor: isAvailable ? '#10B981' : '#EF4444',
+            border: '2px solid #071710',
+          }}
+        />
       </div>
 
-      {/* Serving Client Info */}
-      <div className="barber-card__serving-box">
-        <span className="barber-card__serving-label">Atendendo no momento:</span>
-        {servingEntry ? (
-          <div className="barber-card__serving-client">
-            <span className="barber-card__client-name">{servingEntry.clientName}</span>
-            <span className="barber-card__service-name">
-              ({(servingEntry.services || []).map(s => s?.name).filter(Boolean).join(', ')})
-            </span>
-          </div>
-        ) : (
-          <div className="barber-card__empty-serving">
-            {barber.status === 'available' ? 'Atendimento Imediato!' : 'Ninguém na cadeira'}
-          </div>
-        )}
+      {/* Barber Name */}
+      <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#F8FAFC', textTransform: 'uppercase', marginBottom: '0.35rem' }}>
+        {barber.name}
+      </h4>
+
+      {/* Status Badge: Disponível / Indisponível */}
+      <div style={{
+        fontSize: '0.775rem',
+        fontWeight: 700,
+        padding: '0.2rem 0.75rem',
+        borderRadius: '12px',
+        background: isAvailable ? 'rgba(16, 185, 129, 0.14)' : 'rgba(239, 68, 68, 0.14)',
+        color: isAvailable ? '#34D399' : '#F87171',
+        border: `1px solid ${isAvailable ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+        marginBottom: '0.65rem',
+      }}>
+        {isAvailable ? 'Disponível' : 'Indisponível'}
       </div>
 
-      {/* Sub Queue for this barber */}
-      {barberQueue.length > 0 && (
-        <div className="barber-card__subqueue">
-          <span className="barber-card__subqueue-title">
-            Fila de espera ({barberQueue.length}):
-          </span>
-          <div className="barber-card__subqueue-list">
-            {barberQueue.map((entry, idx) => (
-              <div key={entry.id} className="barber-card__subqueue-item">
-                <span className="barber-card__subqueue-pos">#{idx + 1}</span>
-                <span className="barber-card__subqueue-name">
-                  {entry.clientName}
-                  {entry.dependents && entry.dependents.length > 0 ? ` (+${entry.dependents.length})` : ''}
-                </span>
-                <span className="barber-card__subqueue-wait">~{entry.estimatedWait}m</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Total wait footer */}
-      <div className="barber-card__footer">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      {/* Wait Time Footer: Livre / Tempo de espera estimado */}
+      <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
-          <polyline points="12,6 12,12 16,14" />
+          <polyline points="12 6 12 12 16 14" />
         </svg>
         <span>
-          Tempo de espera: {totalWait === 0 ? 'Sem espera (Livre)' : `~${totalWait} min de espera`}
+          {totalWait === 0 ? 'Livre' : `Tempo de espera estimado: ~${totalWait} min`}
         </span>
       </div>
     </div>
