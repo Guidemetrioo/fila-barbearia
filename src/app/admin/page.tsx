@@ -29,7 +29,7 @@ export default function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'queue' | 'barbers' | 'services' | 'history'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'queue' | 'services' | 'history'>('dashboard');
   const [historyPeriod, setHistoryPeriod] = useState<'today' | 'week' | 'month' | 'all'>('today');
   const [now, setNow] = useState(Date.now());
 
@@ -287,20 +287,6 @@ export default function AdminPage() {
               </svg>
             ),
             badge: `${waitingEntries.length + servingEntries.length}`,
-          },
-          {
-            key: 'barbers' as const,
-            label: 'Barbeiros',
-            icon: (
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="6" cy="6" r="3" />
-                <circle cx="6" cy="18" r="3" />
-                <line x1="20" y1="4" x2="8.12" y2="15.88" />
-                <line x1="14.47" y1="14.48" x2="20" y2="20" />
-                <line x1="8.12" y1="8.12" x2="12" y2="12" />
-              </svg>
-            ),
-            badge: '',
           },
           {
             key: 'services' as const,
@@ -664,147 +650,7 @@ export default function AdminPage() {
         </>
       )}
 
-      {/* ======== BARBERS TAB ======== */}
-      {activeTab === 'barbers' && (
-        <div className="section-card" style={{ padding: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--gold)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-              Equipe de Barbeiros — {revenuePeriod === 'today' ? 'Hoje' : 'Mensal'}
-            </h2>
-            <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(255, 255, 255, 0.04)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-              <button
-                className={`btn btn-sm ${revenuePeriod === 'today' ? 'btn-gold' : 'btn-outline'}`}
-                onClick={() => setRevenuePeriod('today')}
-                style={{ padding: '0.25rem 0.75rem', fontSize: '0.775rem', borderRadius: '6px' }}
-              >
-                Hoje
-              </button>
-              <button
-                className={`btn btn-sm ${revenuePeriod === 'month' ? 'btn-gold' : 'btn-outline'}`}
-                onClick={() => setRevenuePeriod('month')}
-                style={{ padding: '0.25rem 0.75rem', fontSize: '0.775rem', borderRadius: '6px' }}
-              >
-                Mensal
-              </button>
-            </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
-            {barbers.map(barber => {
-              const stats = barberStatsMap[barber.id] || { revenue: 0, cuts: 0 };
-              const percent = (stats.revenue / maxRevenue) * 100;
-              return (
-                <div
-                  key={barber.id}
-                  style={{
-                    background: 'rgba(10, 24, 17, 0.75)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '16px',
-                    padding: '1.25rem 1rem 1rem 1rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textAlign: 'center',
-                  }}
-                >
-                  <div style={{ position: 'relative', marginBottom: '0.65rem' }}>
-                    <Image
-                      src={barber.avatar}
-                      alt={barber.name}
-                      width={72}
-                      height={72}
-                      style={{ borderRadius: '50%', border: '2px solid var(--gold)', objectFit: 'cover' }}
-                    />
-                  </div>
-
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
-                    {barber.name}
-                  </h3>
-
-                  <div style={{
-                    fontSize: '0.775rem',
-                    fontWeight: 700,
-                    padding: '0.2rem 0.75rem',
-                    borderRadius: '12px',
-                    background: barber.status === 'available' ? 'rgba(16, 185, 129, 0.15)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                    color: barber.status === 'available' ? '#34D399' : barber.status === 'busy' ? '#F87171' : '#FBBF24',
-                    border: `1px solid ${barber.status === 'available' ? 'rgba(16, 185, 129, 0.3)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-                    marginBottom: '0.85rem',
-                  }}>
-                    {barber.status === 'available' ? 'Livre' : barber.status === 'busy' ? 'Atendendo' : 'Em pausa'}
-                  </div>
-
-                  <div style={{ width: '100%', marginBottom: '1.1rem' }}>
-                    {barber.status !== 'break' ? (
-                      <button
-                        className="btn btn-outline"
-                        onClick={() => setBarberStatus(barber.id, 'break')}
-                        style={{
-                          width: '100%',
-                          justifyContent: 'center',
-                          borderRadius: '10px',
-                          padding: '0.55rem',
-                          fontWeight: 700,
-                          fontSize: '0.875rem',
-                          background: 'rgba(255, 255, 255, 0.03)',
-                          borderColor: 'rgba(255, 255, 255, 0.15)',
-                          color: '#F8FAFC',
-                        }}
-                      >
-                        Pausar
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-gold"
-                        onClick={() => setBarberStatus(barber.id, 'available')}
-                        style={{
-                          width: '100%',
-                          justifyContent: 'center',
-                          borderRadius: '10px',
-                          padding: '0.55rem',
-                          fontWeight: 700,
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        Retornar
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Barber Revenue Stats Footer */}
-                  <div style={{ width: '100%', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '0.75rem', marginTop: 'auto' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
-                        {barber.name} <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{stats.cuts} cortes</span>
-                      </span>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--gold)' }}>
-                        R$ {stats.revenue.toFixed(2)}
-                      </span>
-                    </div>
-                    <div style={{ width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div
-                        style={{
-                          width: `${percent}%`,
-                          height: '100%',
-                          background: 'linear-gradient(90deg, #D4AF37 0%, #F59E0B 100%)',
-                          borderRadius: '4px',
-                          transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       {/* ======== SERVICES TAB ======== */}
       {activeTab === 'services' && (
