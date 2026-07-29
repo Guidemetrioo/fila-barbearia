@@ -153,8 +153,8 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border-subtle);
   border-top: 1px solid rgba(212, 175, 55, 0.25);
   border-radius: var(--radius-xl);
-  padding: 1.75rem;
-  margin-bottom: 1.5rem;
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1.25rem;
   box-shadow: var(--shadow-card);
   transition: transform var(--transition-base), border-color var(--transition-base);
 }
@@ -342,12 +342,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .shop-profile__avatar {
-  width: 105px;
-  height: 105px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--gold);
-  box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
   background: var(--bg-secondary);
 }
 
@@ -1087,15 +1087,89 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 0.2rem;
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments for Mobile */
 @media (max-width: 640px) {
   .page-container {
-    padding: 1rem 0.85rem 3rem 0.85rem;
+    padding: 0.85rem 0.75rem 3.5rem 0.75rem;
+  }
+  .section-card {
+    padding: 1.1rem 0.95rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+  }
+  .queue-header {
+    padding: 0.25rem 0 0.75rem 0;
+    gap: 0.75rem;
   }
   .queue-header__title {
-    font-size: 1.75rem;
+    font-size: 1.55rem;
+  }
+  .queue-header__count {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.95rem;
+  }
+  .shop-profile__avatar {
+    width: 72px;
+    height: 72px;
+  }
+  .shop-profile__name {
+    font-size: 1.35rem;
+  }
+  .shop-profile__description {
+    font-size: 0.825rem;
+    line-height: 1.5;
+    margin-bottom: 0.85rem;
+  }
+  .announcement-banner {
+    padding: 0.75rem 0.85rem;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+  .announcement-banner__item {
+    font-size: 0.75rem;
+  }
+  .barbers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .barber-card {
+    padding: 0.85rem 0.6rem;
+    border-radius: var(--radius-lg);
+  }
+  .barber-card__avatar {
+    width: 58px;
+    height: 58px;
+  }
+  .barber-card__name {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+  .barber-card__status {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.55rem;
+    margin-bottom: 0.5rem;
+  }
+  .barber-card__wait {
+    font-size: 0.75rem;
+  }
+  .nav-tabs {
+    padding: 0.3rem;
+    gap: 0.3rem;
+    margin-bottom: 1.25rem;
+  }
+  .nav-tab {
+    padding: 0.55rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  .btn-large {
+    padding: 0.85rem 1.25rem;
+    font-size: 0.95rem;
   }
   .schedule-time-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .modal-content {
+    padding: 1.25rem 1rem;
+    border-radius: var(--radius-xl);
   }
 }
