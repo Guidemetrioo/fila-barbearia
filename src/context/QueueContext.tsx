@@ -69,7 +69,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         }
       }
       if (savedBarbers) setBarbers(JSON.parse(savedBarbers));
-      if (savedConfig) setConfig({ ...defaultConfig, ...JSON.parse(savedConfig) });
+      if (savedConfig) setConfig({ ...defaultConfig, ...JSON.parse(savedConfig), name: defaultConfig.name });
       if (savedHistory) {
         const parsedHist = JSON.parse(savedHistory);
         if (Array.isArray(parsedHist)) {
