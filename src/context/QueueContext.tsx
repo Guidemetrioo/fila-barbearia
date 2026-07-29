@@ -30,6 +30,8 @@ interface QueueContextType {
   getBarberQueue: (barberId: string) => QueueEntry[];
   getBarberWaitTime: (barberId: string) => number;
   clearHistory: () => void;
+  loadDemoData: () => void;
+  clearQueue: () => void;
 }
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -339,6 +341,81 @@ export function QueueProvider({ children }: { children: ReactNode }) {
     setHistory([]);
   }, []);
 
+  const loadDemoData = useCallback(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const demoQueue: QueueEntry[] = [
+      {
+        id: 'demo-1',
+        clientName: 'Gabriel Santos',
+        whatsapp: '(11) 98123-4567',
+        services: [defaultServices[0], defaultServices[1]],
+        barberId: 'barber-1',
+        barberName: 'LUCAS',
+        status: 'being-served',
+        position: 0,
+        joinedAt: Date.now() - 25 * 60000,
+        estimatedWait: 0,
+        mode: 'queue',
+      },
+      {
+        id: 'demo-2',
+        clientName: 'Carlos Eduardo',
+        whatsapp: '(11) 97654-3210',
+        services: [defaultServices[0]],
+        barberId: 'barber-1',
+        barberName: 'LUCAS',
+        status: 'waiting',
+        position: 1,
+        joinedAt: Date.now() - 15 * 60000,
+        estimatedWait: 15,
+        mode: 'queue',
+      },
+      {
+        id: 'demo-3',
+        clientName: 'Felipe Amorim',
+        whatsapp: '(11) 99887-6655',
+        services: [defaultServices[2]],
+        barberId: 'barber-2',
+        barberName: 'RAFAEL',
+        status: 'waiting',
+        position: 2,
+        joinedAt: Date.now() - 10 * 60000,
+        estimatedWait: 35,
+        mode: 'queue',
+      },
+      {
+        id: 'demo-4',
+        clientName: 'Marcelo Oliveira',
+        whatsapp: '(11) 95544-3322',
+        services: [defaultServices[0]],
+        barberId: undefined,
+        barberName: undefined,
+        status: 'waiting',
+        position: 3,
+        joinedAt: Date.now() - 5 * 60000,
+        estimatedWait: 50,
+        mode: 'scheduled',
+        scheduledTime: '15:00',
+        scheduledDate: todayStr,
+      },
+    ];
+
+    const demoBarbers: Barber[] = [
+      { id: 'barber-1', name: 'LUCAS', avatar: '/images/barber1.png', status: 'busy', currentClient: 'demo-1' },
+      { id: 'barber-2', name: 'RAFAEL', avatar: '/images/barber2.png', status: 'available' },
+      { id: 'barber-3', name: 'MATHEUS', avatar: '/images/barber3.png', status: 'available' },
+    ];
+
+    setQueue(demoQueue);
+    setBarbers(demoBarbers);
+    setConfig(prev => ({ ...prev, isOpen: true, isQueueOpen: true }));
+  }, []);
+
+  const clearQueue = useCallback(() => {
+    setQueue([]);
+    setBarbers(prev => prev.map(b => ({ ...b, status: 'available', currentClient: undefined })));
+  }, []);
+
   return (
     <QueueContext.Provider
       value={{
@@ -359,6 +436,8 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         getBarberQueue,
         getBarberWaitTime,
         clearHistory,
+        loadDemoData,
+        clearQueue,
       }}
     >
       {children}

@@ -21,6 +21,8 @@ export default function AdminPage() {
     removeFromQueue,
     setBarberStatus,
     clearHistory,
+    loadDemoData,
+    clearQueue,
   } = useQueue();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -178,7 +180,7 @@ export default function AdminPage() {
       </div>
 
       {/* Quick Toggles */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
         <div className="admin-toggle" style={{ marginBottom: 0 }}>
           <span className="admin-toggle__label">{config.isOpen ? '🟢 Barbearia' : '🔴 Barbearia'}</span>
           <div className={`toggle-switch ${config.isOpen ? 'active' : ''}`} onClick={toggleShopOpen} />
@@ -187,6 +189,26 @@ export default function AdminPage() {
           <span className="admin-toggle__label">{config.isQueueOpen ? '🟢 Fila' : '🔴 Fila'}</span>
           <div className={`toggle-switch ${config.isQueueOpen ? 'active' : ''}`} onClick={toggleQueueOpen} />
         </div>
+      </div>
+
+      {/* Demo Controls */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        <button
+          className="btn btn-gold btn-sm"
+          onClick={loadDemoData}
+          style={{ flex: 1, justifyContent: 'center' }}
+          title="Preencher com clientes e status de exemplo para apresentação"
+        >
+          ⚡ Carregar Dados de Demonstração
+        </button>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={clearQueue}
+          style={{ flex: 1, justifyContent: 'center' }}
+          title="Zerar a fila ativa"
+        >
+          🧹 Limpar Fila
+        </button>
       </div>
 
       {/* Nav Tabs */}

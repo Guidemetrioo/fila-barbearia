@@ -59,9 +59,9 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
 
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 2) return `(${numbers}`;
-    if (numbers.length <= 7) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-    if (numbers.length <= 11) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`;
+    if (numbers.length <= 2) return numbers ? `(${numbers}` : '';
+    if (numbers.length <= 6) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+    if (numbers.length <= 10) return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`;
     return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
   };
 
@@ -519,7 +519,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
                         </div>
                       </div>
                       <span className="service-option__right">
-                        R$ {service.price.toFixed(2)} • {service.duration}m
+                        R$ {service.price.toFixed(2).replace('.', ',')} • {service.duration}m
                       </span>
                     </div>
                   );
@@ -604,7 +604,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
                 }}
               >
                 <span>Total Estimado:</span>
-                <span style={{ color: 'var(--gold)' }}>R$ {totalPrice.toFixed(2)} (~{totalDuration} min)</span>
+                <span style={{ color: 'var(--gold)' }}>R$ {totalPrice.toFixed(2).replace('.', ',')} (~{totalDuration} min)</span>
               </div>
             </div>
 

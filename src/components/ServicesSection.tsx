@@ -23,7 +23,7 @@ export default function ServicesSection() {
           <div key={svc.id} className="service-card-public">
             <div className="service-card-public__header">
               <span className="service-card-public__name">{svc.name}</span>
-              <span className="service-card-public__price">R$ {svc.price.toFixed(2)}</span>
+              <span className="service-card-public__price">R$ {svc.price.toFixed(2).replace('.', ',')}</span>
             </div>
             {svc.description && (
               <p className="service-card-public__desc">{svc.description}</p>
