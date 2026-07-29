@@ -29,9 +29,7 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
     return today.toISOString().split('T')[0];
   });
 
-  if (!isOpen) return null;
-
-  // Generate next 7 days for day selector
+  // Generate next 7 days for day selector (must be before early return for Rules of Hooks)
   const nextDays = useMemo(() => {
     const days: { date: string; label: string; weekday: string }[] = [];
     const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -56,6 +54,8 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
     '13:00', '14:00', '15:00', '16:00',
     '17:00', '18:00', '19:00', '20:00',
   ];
+
+  if (!isOpen) return null;
 
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, '');
