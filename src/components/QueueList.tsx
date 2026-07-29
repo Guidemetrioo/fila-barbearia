@@ -89,7 +89,7 @@ export default function QueueList({ filterBarberId }: QueueListProps) {
               <div className="queue-list__item-wait">
                 {entry.mode === 'scheduled' && entry.scheduledTime ? (
                   <div className="queue-list__item-badge queue-list__item-badge--scheduled">
-                    📅 {entry.scheduledTime}
+                    📅 {entry.scheduledDate ? entry.scheduledDate.split('-').reverse().join('/') : ''} às {entry.scheduledTime}
                   </div>
                 ) : (
                   <div>~{entry.estimatedWait} min</div>
