@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useQueue } from '@/context/QueueContext';
+import { Service } from '@/types';
 
 const ADMIN_PASSWORD = 'delrey2024';
 
@@ -22,6 +23,7 @@ export default function AdminPage() {
     clearHistory,
     loadDemoData,
     clearQueue,
+    updateService,
   } = useQueue();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -30,6 +32,29 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'queue' | 'barbers' | 'services' | 'history'>('dashboard');
   const [historyPeriod, setHistoryPeriod] = useState<'today' | 'week' | 'month' | 'all'>('today');
   const [now, setNow] = useState(Date.now());
+
+  // Service Editor Modal State
+  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [editPrice, setEditPrice] = useState<string>('');
+  const [editDuration, setEditDuration] = useState<string>('');
+
+  const handleOpenEditService = (svc: Service) => {
+    setEditingService(svc);
+    setEditPrice(svc.price.toString());
+    setEditDuration(svc.duration.toString());
+  };
+
+  const handleSaveService = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingService) return;
+    const priceNum = parseFloat(editPrice.replace(',', '.'));
+    const durationNum = parseInt(editDuration, 10);
+    if (isNaN(priceNum) || priceNum <= 0) return;
+    if (isNaN(durationNum) || durationNum <= 0) return;
+
+    updateService(editingService.id, priceNum, durationNum);
+    setEditingService(null);
+  };
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 30000);
@@ -453,15 +478,37 @@ export default function AdminPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <th style={{ padding: '0.5rem 0', color: 'var(--gold)', fontSize: '0.85rem' }}>Serviço</th>
-                  <th style={{ padding: '0.5rem 0', color: 'var(--gold)', fontSize: '0.85rem', textAlign: 'right' }}>Preço</th>
+                  <th style={{ padding: '0.65rem 0', color: 'var(--gold)', fontSize: '0.85rem' }}>Serviço</th>
+                  <th style={{ padding: '0.65rem 0', color: 'var(--gold)', fontSize: '0.85rem', textAlign: 'center' }}>Duração</th>
+                  <th style={{ padding: '0.65rem 0', color: 'var(--gold)', fontSize: '0.85rem', textAlign: 'right' }}>Preço</th>
+                  <th style={{ padding: '0.65rem 0', color: 'var(--gold)', fontSize: '0.85rem', textAlign: 'right' }}>Editar</th>
                 </tr>
               </thead>
               <tbody>
                 {services.map(svc => (
-                  <tr key={svc.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                    <td style={{ padding: '0.75rem 0', fontWeight: 700, fontSize: '0.9rem', color: '#FFF' }}>{svc.name}</td>
-                    <td style={{ padding: '0.75rem 0', textAlign: 'right', fontWeight: 800, color: 'var(--gold)' }}>R$ {svc.price.toFixed(2)}</td>
+                  <tr key={svc.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '0.85rem 0', fontWeight: 700, fontSize: '0.9rem', color: '#FFF' }}>
+                      <div>{svc.name}</div>
+                    </td>
+                    <td style={{ padding: '0.85rem 0', textAlign: 'center', fontSize: '0.85rem', color: '#CBD5E1', fontWeight: 600 }}>
+                      ⏱️ {svc.duration} min
+                    </td>
+                    <td style={{ padding: '0.85rem 0', textAlign: 'right', fontWeight: 800, color: 'var(--gold)', fontSize: '0.95rem' }}>
+                      R$ {svc.price.toFixed(2).replace('.', ',')}
+                    </td>
+                    <td style={{ padding: '0.85rem 0', textAlign: 'right' }}>
+                      <button
+                        className="btn btn-gold btn-sm"
+                        onClick={() => handleOpenEditService(svc)}
+                        style={{ padding: '0.35rem 0.65rem', gap: '0.35rem', fontSize: '0.8rem' }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        Editar
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -503,6 +550,122 @@ export default function AdminPage() {
             )}
           </div>
         </>
+      )}
+
+      {/* ======== INTUITIVE SERVICE EDITOR MODAL ======== */}
+      {editingService && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '1rem',
+        }}>
+          <div style={{
+            background: '#071710',
+            border: '1px solid var(--gold)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            maxWidth: '420px',
+            width: '100%',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--gold)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                ✏️ Editar Serviço — {editingService.name}
+              </h3>
+              <button
+                onClick={() => setEditingService(null)}
+                style={{ background: 'none', border: 'none', color: '#94A3B8', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveService} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#E2E8F0', marginBottom: '0.4rem' }}>
+                  Preço do Serviço (R$)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="1"
+                  value={editPrice}
+                  onChange={e => setEditPrice(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(212, 175, 55, 0.4)',
+                    borderRadius: '8px',
+                    color: '#F8FAFC',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                  }}
+                  required
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, color: '#E2E8F0', marginBottom: '0.4rem' }}>
+                  Duração Estimada (minutos)
+                </label>
+                <input
+                  type="number"
+                  step="1"
+                  min="1"
+                  value={editDuration}
+                  onChange={e => setEditDuration(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(212, 175, 55, 0.4)',
+                    borderRadius: '8px',
+                    color: '#F8FAFC',
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                  }}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingService(null)}
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: '8px',
+                    color: '#94A3B8',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-gold"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                >
+                  Salvar Alterações
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

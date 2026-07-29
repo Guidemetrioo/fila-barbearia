@@ -34,6 +34,7 @@ interface QueueContextType {
   clearHistory: () => void;
   loadDemoData: () => void;
   clearQueue: () => void;
+  updateService: (serviceId: string, price: number, duration: number) => void;
 }
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -44,13 +45,14 @@ const DB_PATHS = {
   barbers: 'barbers',
   config: 'config',
   history: 'history',
+  services: 'services',
 };
 
 export function QueueProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<ShopConfig>(defaultConfig);
   const [barbers, setBarbers] = useState<Barber[]>(initialBarbers);
   const [queue, setQueue] = useState<QueueEntry[]>([]);
-  const [services] = useState<Service[]>(defaultServices);
+  const [services, setServices] = useState<Service[]>(defaultServices);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -116,6 +118,16 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       }
     });
 
+    // Listen to services changes
+    const servicesRef = ref(database, DB_PATHS.services);
+    const unsubServices = onValue(servicesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const servicesList: Service[] = Object.values(data);
+        setServices(servicesList);
+      }
+    });
+
     setIsLoaded(true);
 
     // Cleanup listeners on unmount
@@ -124,6 +136,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       unsubBarbers();
       unsubConfig();
       unsubHistory();
+      unsubServices();
     };
   }, []);
 
@@ -488,6 +501,19 @@ export function QueueProvider({ children }: { children: ReactNode }) {
     writeBarbersToFirebase(resetBarbers);
   }, [barbers, writeQueueToFirebase, writeBarbersToFirebase]);
 
+  const updateService = useCallback((serviceId: string, newPrice: number, newDuration: number) => {
+    setServices(prev => {
+      const updated = prev.map(s => s.id === serviceId ? { ...s, price: newPrice, duration: newDuration } : s);
+      try {
+        const cleanObj = JSON.parse(JSON.stringify(updated));
+        set(ref(database, DB_PATHS.services), cleanObj);
+      } catch (err) {
+        console.error('Firebase services write error:', err);
+      }
+      return updated;
+    });
+  }, []);
+
   return (
     <QueueContext.Provider
       value={{
@@ -510,6 +536,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         clearHistory,
         loadDemoData,
         clearQueue,
+        updateService,
       }}
     >
       {children}
