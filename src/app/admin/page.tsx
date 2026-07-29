@@ -110,11 +110,11 @@ export default function AdminPage() {
 
   const [revenuePeriod, setRevenuePeriod] = useState<'today' | 'month'>('today');
 
-  // Revenue per barber (Today or Monthly)
-  const revenuePerBarber = useMemo(() => {
-    const map: Record<string, { name: string; revenue: number; cuts: number }> = {};
+  // Revenue stats per barber (Today or Monthly)
+  const barberStatsMap = useMemo(() => {
+    const map: Record<string, { revenue: number; cuts: number }> = {};
     for (const b of barbers) {
-      map[b.id] = { name: b.name, revenue: 0, cuts: 0 };
+      map[b.id] = { revenue: 0, cuts: 0 };
     }
     const targetHistory = revenuePeriod === 'today'
       ? history.filter(h => isToday(h.completedAt))
@@ -126,8 +126,13 @@ export default function AdminPage() {
         map[h.barberId].cuts += 1;
       }
     }
-    return Object.values(map).sort((a, b) => b.revenue - a.revenue);
+    return map;
   }, [barbers, history, revenuePeriod]);
+
+  const maxRevenue = useMemo(() => {
+    const revenues = Object.values(barberStatsMap).map(s => s.revenue);
+    return Math.max(...revenues, 1);
+  }, [barberStatsMap]);
 
   // Service popularity today
   const todayServicesPop = useMemo(() => {
@@ -181,7 +186,6 @@ export default function AdminPage() {
   }
 
   const periodLabel = { today: 'Hoje', week: 'Esta Semana', month: 'Este Mês', all: 'Todo Período' };
-  const maxRevenue = Math.max(...revenuePerBarber.map(b => b.revenue), 1);
 
   return (
     <div className="admin-container">
@@ -296,7 +300,7 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* SECTION 1: Faturamento por Barbeiro — Hoje / Mensal */}
+          {/* SECTION 1: Faturamento por Barbeiro — Hoje / Mensal (Unificado com Equipe de Barbeiros) */}
           <div className="section-card" style={{ padding: '1.25rem', marginBottom: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -320,35 +324,109 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {revenuePerBarber.map((b, i) => {
-                const maxRevenue = Math.max(...revenuePerBarber.map(item => item.revenue), 1);
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+              {barbers.map(barber => {
+                const stats = barberStatsMap[barber.id] || { revenue: 0, cuts: 0 };
+                const percent = (stats.revenue / maxRevenue) * 100;
                 return (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#F8FAFC', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-                          {b.name}
+                  <div
+                    key={barber.id}
+                    style={{
+                      background: 'rgba(10, 24, 17, 0.75)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: '16px',
+                      padding: '1.25rem 1rem 1rem 1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                    }}
+                  >
+                    <div style={{ position: 'relative', marginBottom: '0.65rem' }}>
+                      <Image
+                        src={barber.avatar}
+                        alt={barber.name}
+                        width={72}
+                        height={72}
+                        style={{ borderRadius: '50%', border: '2px solid var(--gold)', objectFit: 'cover' }}
+                      />
+                    </div>
+
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                      {barber.name}
+                    </h3>
+
+                    <div style={{
+                      fontSize: '0.775rem',
+                      fontWeight: 700,
+                      padding: '0.2rem 0.75rem',
+                      borderRadius: '12px',
+                      background: barber.status === 'available' ? 'rgba(16, 185, 129, 0.15)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                      color: barber.status === 'available' ? '#34D399' : barber.status === 'busy' ? '#F87171' : '#FBBF24',
+                      border: `1px solid ${barber.status === 'available' ? 'rgba(16, 185, 129, 0.3)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+                      marginBottom: '0.85rem',
+                    }}>
+                      {barber.status === 'available' ? 'Livre' : barber.status === 'busy' ? 'Atendendo' : 'Em pausa'}
+                    </div>
+
+                    <div style={{ width: '100%', marginBottom: '1.1rem' }}>
+                      {barber.status !== 'break' ? (
+                        <button
+                          className="btn btn-outline"
+                          onClick={() => setBarberStatus(barber.id, 'break')}
+                          style={{
+                            width: '100%',
+                            justifyContent: 'center',
+                            borderRadius: '10px',
+                            padding: '0.55rem',
+                            fontWeight: 700,
+                            fontSize: '0.875rem',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            borderColor: 'rgba(255, 255, 255, 0.15)',
+                            color: '#F8FAFC',
+                          }}
+                        >
+                          Pausar
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn-gold"
+                          onClick={() => setBarberStatus(barber.id, 'available')}
+                          style={{
+                            width: '100%',
+                            justifyContent: 'center',
+                            borderRadius: '10px',
+                            padding: '0.55rem',
+                            fontWeight: 700,
+                            fontSize: '0.875rem',
+                          }}
+                        >
+                          Retornar
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Barber Revenue Stats Footer (Matching reference image) */}
+                    <div style={{ width: '100%', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '0.75rem', marginTop: 'auto' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
+                          {barber.name} <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{stats.cuts} cortes</span>
                         </span>
-                        <span style={{ fontSize: '0.775rem', color: 'var(--text-secondary)' }}>
-                          {b.cuts} cortes
+                        <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--gold)' }}>
+                          R$ {stats.revenue.toFixed(2)}
                         </span>
                       </div>
-                      <span style={{ fontWeight: 800, color: 'var(--gold)', fontSize: '1.15rem' }}>
-                        R$ {b.revenue.toFixed(2)}
-                      </span>
-                    </div>
-                    {/* Gold Progress Bar */}
-                    <div style={{ width: '100%', height: '7px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div
-                        style={{
-                          width: `${(b.revenue / maxRevenue) * 100}%`,
-                          height: '100%',
-                          background: 'linear-gradient(90deg, #D4AF37 0%, #F59E0B 100%)',
-                          borderRadius: '4px',
-                          transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                        }}
-                      />
+                      <div style={{ width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div
+                          style={{
+                            width: `${percent}%`,
+                            height: '100%',
+                            background: 'linear-gradient(90deg, #D4AF37 0%, #F59E0B 100%)',
+                            borderRadius: '4px',
+                            transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 );
@@ -466,92 +544,138 @@ export default function AdminPage() {
 
       {/* ======== BARBERS TAB ======== */}
       {activeTab === 'barbers' && (
-        <>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--gold)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            💈 Equipe de Barbeiros
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
-            {barbers.map(barber => (
-              <div
-                key={barber.id}
-                style={{
-                  background: 'rgba(10, 24, 17, 0.65)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '16px',
-                  padding: '1.5rem 1rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                }}
+        <div className="section-card" style={{ padding: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--gold)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              💈 Equipe de Barbeiros — {revenuePeriod === 'today' ? 'Hoje' : 'Mensal'}
+            </h2>
+            <div style={{ display: 'flex', gap: '0.35rem', background: 'rgba(255, 255, 255, 0.04)', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+              <button
+                className={`btn btn-sm ${revenuePeriod === 'today' ? 'btn-gold' : 'btn-outline'}`}
+                onClick={() => setRevenuePeriod('today')}
+                style={{ padding: '0.25rem 0.75rem', fontSize: '0.775rem', borderRadius: '6px' }}
               >
-                <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
-                  <Image
-                    src={barber.avatar}
-                    alt={barber.name}
-                    width={72}
-                    height={72}
-                    style={{ borderRadius: '50%', border: '2px solid var(--gold)', objectFit: 'cover' }}
-                  />
-                </div>
-
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                  {barber.name}
-                </h3>
-
-                <div style={{
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  padding: '0.25rem 0.85rem',
-                  borderRadius: '14px',
-                  background: barber.status === 'available' ? 'rgba(16, 185, 129, 0.15)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                  color: barber.status === 'available' ? '#34D399' : barber.status === 'busy' ? '#F87171' : '#FBBF24',
-                  border: `1px solid ${barber.status === 'available' ? 'rgba(16, 185, 129, 0.3)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-                  marginBottom: '1rem',
-                }}>
-                  {barber.status === 'available' ? 'Livre' : barber.status === 'busy' ? 'Atendendo' : 'Em pausa'}
-                </div>
-
-                <div style={{ width: '100%' }}>
-                  {barber.status !== 'break' ? (
-                    <button
-                      className="btn btn-outline"
-                      onClick={() => setBarberStatus(barber.id, 'break')}
-                      style={{
-                        width: '100%',
-                        justifyContent: 'center',
-                        borderRadius: '10px',
-                        padding: '0.6rem',
-                        fontWeight: 700,
-                        fontSize: '0.9rem',
-                        background: 'rgba(255, 255, 255, 0.03)',
-                        borderColor: 'rgba(255, 255, 255, 0.15)',
-                        color: '#F8FAFC',
-                      }}
-                    >
-                      Pausar
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-gold"
-                      onClick={() => setBarberStatus(barber.id, 'available')}
-                      style={{
-                        width: '100%',
-                        justifyContent: 'center',
-                        borderRadius: '10px',
-                        padding: '0.6rem',
-                        fontWeight: 700,
-                        fontSize: '0.9rem',
-                      }}
-                    >
-                      Retornar
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+                Hoje
+              </button>
+              <button
+                className={`btn btn-sm ${revenuePeriod === 'month' ? 'btn-gold' : 'btn-outline'}`}
+                onClick={() => setRevenuePeriod('month')}
+                style={{ padding: '0.25rem 0.75rem', fontSize: '0.775rem', borderRadius: '6px' }}
+              >
+                Mensal
+              </button>
+            </div>
           </div>
-        </>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
+            {barbers.map(barber => {
+              const stats = barberStatsMap[barber.id] || { revenue: 0, cuts: 0 };
+              const percent = (stats.revenue / maxRevenue) * 100;
+              return (
+                <div
+                  key={barber.id}
+                  style={{
+                    background: 'rgba(10, 24, 17, 0.75)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '16px',
+                    padding: '1.25rem 1rem 1rem 1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ position: 'relative', marginBottom: '0.65rem' }}>
+                    <Image
+                      src={barber.avatar}
+                      alt={barber.name}
+                      width={72}
+                      height={72}
+                      style={{ borderRadius: '50%', border: '2px solid var(--gold)', objectFit: 'cover' }}
+                    />
+                  </div>
+
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F8FAFC', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                    {barber.name}
+                  </h3>
+
+                  <div style={{
+                    fontSize: '0.775rem',
+                    fontWeight: 700,
+                    padding: '0.2rem 0.75rem',
+                    borderRadius: '12px',
+                    background: barber.status === 'available' ? 'rgba(16, 185, 129, 0.15)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                    color: barber.status === 'available' ? '#34D399' : barber.status === 'busy' ? '#F87171' : '#FBBF24',
+                    border: `1px solid ${barber.status === 'available' ? 'rgba(16, 185, 129, 0.3)' : barber.status === 'busy' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+                    marginBottom: '0.85rem',
+                  }}>
+                    {barber.status === 'available' ? 'Livre' : barber.status === 'busy' ? 'Atendendo' : 'Em pausa'}
+                  </div>
+
+                  <div style={{ width: '100%', marginBottom: '1.1rem' }}>
+                    {barber.status !== 'break' ? (
+                      <button
+                        className="btn btn-outline"
+                        onClick={() => setBarberStatus(barber.id, 'break')}
+                        style={{
+                          width: '100%',
+                          justifyContent: 'center',
+                          borderRadius: '10px',
+                          padding: '0.55rem',
+                          fontWeight: 700,
+                          fontSize: '0.875rem',
+                          background: 'rgba(255, 255, 255, 0.03)',
+                          borderColor: 'rgba(255, 255, 255, 0.15)',
+                          color: '#F8FAFC',
+                        }}
+                      >
+                        Pausar
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-gold"
+                        onClick={() => setBarberStatus(barber.id, 'available')}
+                        style={{
+                          width: '100%',
+                          justifyContent: 'center',
+                          borderRadius: '10px',
+                          padding: '0.55rem',
+                          fontWeight: 700,
+                          fontSize: '0.875rem',
+                        }}
+                      >
+                        Retornar
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Barber Revenue Stats Footer (Matching reference image) */}
+                  <div style={{ width: '100%', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingTop: '0.75rem', marginTop: 'auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>
+                        {barber.name} <span style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{stats.cuts} cortes</span>
+                      </span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--gold)' }}>
+                        R$ {stats.revenue.toFixed(2)}
+                      </span>
+                    </div>
+                    <div style={{ width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          width: `${percent}%`,
+                          height: '100%',
+                          background: 'linear-gradient(90deg, #D4AF37 0%, #F59E0B 100%)',
+                          borderRadius: '4px',
+                          transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* ======== SERVICES TAB ======== */}
