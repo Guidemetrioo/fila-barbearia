@@ -135,7 +135,8 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       for (const entry of entries) {
         queueObj[entry.id] = entry;
       }
-      set(ref(database, DB_PATHS.queue), queueObj).catch(err => {
+      const sanitized = JSON.parse(JSON.stringify(queueObj));
+      set(ref(database, DB_PATHS.queue), sanitized).catch(err => {
         console.error("Firebase write queue error:", err);
       });
     } catch (err) {
@@ -151,7 +152,8 @@ export function QueueProvider({ children }: { children: ReactNode }) {
       for (const barber of barbersList) {
         barbersObj[barber.id] = barber;
       }
-      set(ref(database, DB_PATHS.barbers), barbersObj).catch(err => {
+      const sanitized = JSON.parse(JSON.stringify(barbersObj));
+      set(ref(database, DB_PATHS.barbers), sanitized).catch(err => {
         console.error("Firebase write barbers error:", err);
       });
     } catch (err) {
@@ -163,7 +165,8 @@ export function QueueProvider({ children }: { children: ReactNode }) {
   const writeConfigToFirebase = useCallback((newConfig: ShopConfig) => {
     setConfig(newConfig);
     try {
-      set(ref(database, DB_PATHS.config), newConfig).catch(err => {
+      const sanitized = JSON.parse(JSON.stringify(newConfig));
+      set(ref(database, DB_PATHS.config), sanitized).catch(err => {
         console.error("Firebase write config error:", err);
       });
     } catch (err) {
@@ -351,7 +354,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
 
       // Write history item to Firebase
       const historyRef = ref(database, `${DB_PATHS.history}/${historyItem.id}`);
-      set(historyRef, historyItem);
+      set(historyRef, JSON.parse(JSON.stringify(historyItem)));
 
       // Update barber status
       if (entry.barberId) {
