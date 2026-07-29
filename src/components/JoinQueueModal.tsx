@@ -176,19 +176,24 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
       setError('Selecione o horário do agendamento.');
       return;
     }
-    addToQueue(
-      name.trim(),
-      whatsapp,
-      selectedServices,
-      selectedBarberId === 'any' ? undefined : selectedBarberId,
-      dependents,
-      entryMode === 'scheduled' ? scheduledTime : undefined,
-      entryMode === 'scheduled' ? scheduledDate : undefined
-    );
-    setSuccess(true);
-    setTimeout(() => {
-      handleClose();
-    }, 2200);
+    try {
+      addToQueue(
+        name.trim(),
+        whatsapp,
+        selectedServices,
+        selectedBarberId === 'any' ? undefined : selectedBarberId,
+        dependents,
+        entryMode === 'scheduled' ? scheduledTime : undefined,
+        entryMode === 'scheduled' ? scheduledDate : undefined
+      );
+      setSuccess(true);
+      setTimeout(() => {
+        handleClose();
+      }, 2200);
+    } catch (err) {
+      console.error('Erro ao adicionar à fila:', err);
+      setError('Ocorreu um erro ao salvar seu agendamento. Tente novamente.');
+    }
   };
 
   const handleClose = () => {
@@ -383,17 +388,6 @@ export default function JoinQueueModal({ isOpen, onClose }: JoinQueueModalProps)
               </div>
             </div>
 
-            {/* Manual date input */}
-            <div className="schedule-section">
-              <label className="schedule-label">OU DIGITE OUTRA DATA (DD/MM/AAAA)</label>
-              <input
-                type="date"
-                className="form-input"
-                value={scheduledDate}
-                onChange={e => setScheduledDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
 
             {/* Time slots grid */}
             <div className="schedule-section">

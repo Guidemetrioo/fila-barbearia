@@ -1,14 +1,16 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 
+// Firebase config — these keys are public by design.
+// Security is enforced by Firebase Realtime Database Rules, not by hiding these keys.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCH9GoMrfeTSnLgNLOqvjMF2eAwk8kPMhI",
+  authDomain: "fila-barbearia-bd154.firebaseapp.com",
+  databaseURL: "https://fila-barbearia-bd154-default-rtdb.firebaseio.com",
+  projectId: "fila-barbearia-bd154",
+  storageBucket: "fila-barbearia-bd154.firebasestorage.app",
+  messagingSenderId: "526248427249",
+  appId: "1:526248427249:web:4cfbc217eaba397045b350",
 };
 
 // Initialize Firebase only once

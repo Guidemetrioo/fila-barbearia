@@ -129,25 +129,46 @@ export function QueueProvider({ children }: { children: ReactNode }) {
 
   // ===== HELPER: Write full queue to Firebase =====
   const writeQueueToFirebase = useCallback((entries: QueueEntry[]) => {
-    const queueObj: Record<string, QueueEntry> = {};
-    for (const entry of entries) {
-      queueObj[entry.id] = entry;
+    setQueue(entries);
+    try {
+      const queueObj: Record<string, QueueEntry> = {};
+      for (const entry of entries) {
+        queueObj[entry.id] = entry;
+      }
+      set(ref(database, DB_PATHS.queue), queueObj).catch(err => {
+        console.error("Firebase write queue error:", err);
+      });
+    } catch (err) {
+      console.error("Firebase queue ref error:", err);
     }
-    set(ref(database, DB_PATHS.queue), queueObj);
   }, []);
 
   // ===== HELPER: Write barbers to Firebase =====
   const writeBarbersToFirebase = useCallback((barbersList: Barber[]) => {
-    const barbersObj: Record<string, Barber> = {};
-    for (const barber of barbersList) {
-      barbersObj[barber.id] = barber;
+    setBarbers(barbersList);
+    try {
+      const barbersObj: Record<string, Barber> = {};
+      for (const barber of barbersList) {
+        barbersObj[barber.id] = barber;
+      }
+      set(ref(database, DB_PATHS.barbers), barbersObj).catch(err => {
+        console.error("Firebase write barbers error:", err);
+      });
+    } catch (err) {
+      console.error("Firebase barbers ref error:", err);
     }
-    set(ref(database, DB_PATHS.barbers), barbersObj);
   }, []);
 
   // ===== HELPER: Write config to Firebase =====
   const writeConfigToFirebase = useCallback((newConfig: ShopConfig) => {
-    set(ref(database, DB_PATHS.config), newConfig);
+    setConfig(newConfig);
+    try {
+      set(ref(database, DB_PATHS.config), newConfig).catch(err => {
+        console.error("Firebase write config error:", err);
+      });
+    } catch (err) {
+      console.error("Firebase config ref error:", err);
+    }
   }, []);
 
   const getBarberQueue = useCallback(
