@@ -524,6 +524,10 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
 }
 
+.queue-waiting-section {
+  scroll-margin-top: 1rem;
+}
+
 /* ==========================================
    BARBER CARDS
    ========================================== */
@@ -817,6 +821,62 @@ h1, h2, h3, h4, h5, h6 {
 /* ==========================================
    SERVICES GRID
    ========================================== */
+
+.services-showcase {
+  padding: 1.1rem 1.15rem;
+  margin-bottom: 1.5rem;
+}
+
+.services-showcase__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.services-showcase__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 0.75rem;
+}
+
+.services-showcase__card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem 0.65rem;
+  min-width: 0;
+  padding: 0.85rem 0.9rem;
+  background: rgba(10, 24, 17, 0.65);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.services-showcase__name {
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.services-showcase__price {
+  color: var(--gold);
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.services-showcase__duration {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
 
 .services-grid {
   display: flex;
@@ -1271,6 +1331,34 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.8rem;
     min-height: 44px;
     scroll-snap-align: start;
+  }
+  .services-showcase {
+    padding: 0.85rem;
+  }
+  .services-showcase__title {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+  }
+  .services-showcase__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .services-showcase__card {
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 0.25rem;
+    min-height: 92px;
+    padding: 0.65rem;
+  }
+  .services-showcase__name {
+    font-size: 0.76rem;
+  }
+  .services-showcase__price {
+    font-size: 0.88rem;
+  }
+  .services-showcase__duration {
+    grid-column: auto;
+    font-size: 0.66rem;
   }
   .btn-large {
     padding: 0.85rem 1.25rem;

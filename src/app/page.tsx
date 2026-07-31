@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useQueue } from '@/context/QueueContext';
 import { useLayout, SectionId } from '@/context/LayoutContext';
 import QueueHeader from '@/components/QueueHeader';
@@ -20,8 +20,34 @@ export default function Home() {
 
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'queue' | 'barbers' | 'services' | 'help'>('queue');
+  const [activeTab, setActiveTab] = useState<'queue' | 'services' | 'help'>('queue');
   const [filterBarberId, setFilterBarberId] = useState<string | null>(null);
+  const pendingQueueScroll = useRef(false);
+
+  const scrollToWaitingQueue = () => {
+    document.getElementById('queue-waiting-section')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
+
+  useEffect(() => {
+    if (activeTab !== 'queue' || !pendingQueueScroll.current) return;
+
+    pendingQueueScroll.current = false;
+    const frame = requestAnimationFrame(scrollToWaitingQueue);
+    return () => cancelAnimationFrame(frame);
+  }, [activeTab]);
+
+  const handleQueueNavigation = () => {
+    if (activeTab === 'queue') {
+      scrollToWaitingQueue();
+      return;
+    }
+
+    pendingQueueScroll.current = true;
+    setActiveTab('queue');
+  };
 
   const handleToggleBarberFilter = (barberId: string) => {
     setFilterBarberId(prev => prev === barberId ? null : barberId);
@@ -117,7 +143,7 @@ export default function Home() {
 
       case 'queue':
         return (
-          <div key="queue" style={{ marginBottom: '1.25rem' }}>
+          <div id="queue-waiting-section" className="queue-waiting-section" key="queue" style={{ marginBottom: '1.25rem' }}>
             {filterBarberId && activeFilterBarber && (
               <div className="queue-filter-banner" style={{ marginBottom: '1.25rem' }}>
                 <span>Filtrando fila de: <strong>{activeFilterBarber.name}</strong></span>
@@ -153,15 +179,9 @@ export default function Home() {
       <div className="nav-tabs" aria-label="Navegação principal">
         <button
           className={`nav-tab ${activeTab === 'queue' ? 'active' : ''}`}
-          onClick={() => setActiveTab('queue')}
+          onClick={handleQueueNavigation}
         >
           Fila em Tempo Real
-        </button>
-        <button
-          className={`nav-tab ${activeTab === 'barbers' ? 'active' : ''}`}
-          onClick={() => setActiveTab('barbers')}
-        >
-          Profissionais ({barbers.filter(b => b.status !== 'offline').length})
         </button>
         <button
           className={`nav-tab ${activeTab === 'services' ? 'active' : ''}`}
@@ -201,19 +221,6 @@ export default function Home() {
               {sectionId === 'action' && renderNavigation()}
             </Fragment>
           ))
-        )}
-
-        {activeTab === 'barbers' && (
-          <div className="section-card">
-            <h3 className="barbers-section__title" style={{ marginBottom: '1.25rem' }}>Equipe de Barbeiros</h3>
-            <div className="barbers-grid">
-              {barbers
-                .filter(b => b.status !== 'offline')
-                .map(barber => (
-                  <BarberCard key={barber.id} barber={barber} queueEntries={queue} />
-                ))}
-            </div>
-          </div>
         )}
 
         {activeTab === 'services' && <ServicesSection />}
