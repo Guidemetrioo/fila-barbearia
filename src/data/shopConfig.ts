@@ -18,19 +18,19 @@ export const shopConfig: ShopConfig = {
 export const initialBarbers: Barber[] = [
   {
     id: 'barber-1',
-    name: 'LUCAS',
+    name: 'JUCA',
     avatar: '/images/barber1.png',
     status: 'available',
   },
   {
     id: 'barber-2',
-    name: 'RAFAEL',
+    name: 'VITORIA',
     avatar: '/images/barber2.png',
     status: 'available',
   },
   {
     id: 'barber-3',
-    name: 'MATHEUS',
+    name: 'ANDERSON',
     avatar: '/images/barber3.png',
     status: 'available',
   },

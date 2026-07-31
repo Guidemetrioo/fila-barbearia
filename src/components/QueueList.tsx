@@ -7,7 +7,10 @@ interface QueueListProps {
 }
 
 export default function QueueList({ filterBarberId }: QueueListProps) {
-  const { queue } = useQueue();
+  const { queue, barbers } = useQueue();
+
+  const getBarberName = (barberId?: string, storedName?: string) =>
+    barbers.find(barber => barber.id === barberId)?.name || storedName || 'JUCA';
 
   let waitingEntries = queue
     .filter(e => e.status === 'waiting')
@@ -89,7 +92,7 @@ export default function QueueList({ filterBarberId }: QueueListProps) {
                     {(entry.services || []).map(s => s?.name).filter(Boolean).join(' + ')}
                   </div>
                   <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--gold)' }}>
-                    Profissional: {entry.barberName || 'LUCAS'}
+                    Profissional: {getBarberName(entry.barberId, entry.barberName)}
                   </div>
                 </div>
               </div>

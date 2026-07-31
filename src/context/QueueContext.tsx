@@ -84,7 +84,11 @@ export function QueueProvider({ children }: { children: ReactNode }) {
     const unsubBarbers = onValue(barbersRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const barbersList: Barber[] = Object.values(data);
+        const canonicalNames = new Map(initialBarbers.map(barber => [barber.id, barber.name]));
+        const barbersList = (Object.values(data) as Barber[]).map(barber => ({
+          ...barber,
+          name: canonicalNames.get(barber.id) || barber.name,
+        }));
         setBarbers(barbersList);
       }
       // If no data in Firebase yet, keep defaults (will be written on first action)
@@ -440,7 +444,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         whatsapp: '(11) 98123-4567',
         services: [defaultServices[0], defaultServices[1]],
         barberId: 'barber-1',
-        barberName: 'LUCAS',
+        barberName: 'JUCA',
         status: 'being-served',
         position: 0,
         joinedAt: Date.now() - 25 * 60000,
@@ -453,7 +457,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         whatsapp: '(11) 97654-3210',
         services: [defaultServices[0]],
         barberId: 'barber-1',
-        barberName: 'LUCAS',
+        barberName: 'JUCA',
         status: 'waiting',
         position: 1,
         joinedAt: Date.now() - 15 * 60000,
@@ -466,7 +470,7 @@ export function QueueProvider({ children }: { children: ReactNode }) {
         whatsapp: '(11) 99887-6655',
         services: [defaultServices[2]],
         barberId: 'barber-2',
-        barberName: 'RAFAEL',
+        barberName: 'VITORIA',
         status: 'waiting',
         position: 2,
         joinedAt: Date.now() - 10 * 60000,
@@ -491,9 +495,9 @@ export function QueueProvider({ children }: { children: ReactNode }) {
     ];
 
     const demoBarbers: Barber[] = [
-      { id: 'barber-1', name: 'LUCAS', avatar: '/images/barber1.png', status: 'busy', currentClient: 'demo-1' },
-      { id: 'barber-2', name: 'RAFAEL', avatar: '/images/barber2.png', status: 'available' },
-      { id: 'barber-3', name: 'MATHEUS', avatar: '/images/barber3.png', status: 'available' },
+      { id: 'barber-1', name: 'JUCA', avatar: '/images/barber1.png', status: 'busy', currentClient: 'demo-1' },
+      { id: 'barber-2', name: 'VITORIA', avatar: '/images/barber2.png', status: 'available' },
+      { id: 'barber-3', name: 'ANDERSON', avatar: '/images/barber3.png', status: 'available' },
     ];
 
     writeQueueToFirebase(demoQueue);
