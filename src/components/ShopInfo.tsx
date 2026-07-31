@@ -7,8 +7,9 @@ export default function ShopInfo() {
 
   return (
     <div className="section-card" style={{ padding: '1.35rem 1.5rem', marginBottom: '1.5rem' }}>
-      <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ color: '#EF4444' }}>📍</span> Informações do Estabelecimento
+      <h3 className="shop-info__title">
+        <span className="shop-info__title-icon">📍</span>
+        <span>Informações do Estabelecimento</span>
       </h3>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.85rem' }}>
