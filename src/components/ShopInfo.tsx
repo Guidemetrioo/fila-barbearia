@@ -59,6 +59,27 @@ export default function ShopInfo() {
             @delrey_barbearia
           </a>
         </div>
+
+        {/* Hidden / Discreet Admin Access Link */}
+        <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'right' }}>
+          <a
+            href="/admin"
+            style={{
+              fontSize: '0.7rem',
+              color: 'rgba(255, 255, 255, 0.25)',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              transition: 'color 0.2s ease',
+            }}
+            title="Painel Administrativo"
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.25)')}
+          >
+            🔒 Acesso Restrito
+          </a>
+        </div>
       </div>
     </div>
   );

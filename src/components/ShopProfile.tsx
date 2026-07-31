@@ -15,15 +15,17 @@ export default function ShopProfile() {
 
   return (
     <div className="section-card shop-profile" style={{ paddingBottom: '1.25rem' }}>
-      <div className="shop-profile__avatar-wrapper">
-        <Image
-          src={shopLogo}
-          alt={shopTitle}
-          width={84}
-          height={84}
-          className="shop-profile__avatar"
-          priority
-        />
+      <div className="shop-profile__avatar-wrapper" style={{ cursor: 'pointer' }}>
+        <a href="/admin" title="Acesso Administrador" style={{ display: 'block' }}>
+          <Image
+            src={shopLogo}
+            alt={shopTitle}
+            width={84}
+            height={84}
+            className="shop-profile__avatar"
+            priority
+          />
+        </a>
       </div>
       <h2 className="shop-profile__name">{shopTitle}</h2>
       {shopDesc && (
