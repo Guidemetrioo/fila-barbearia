@@ -136,7 +136,7 @@ export const DEFAULT_LAYOUT_CONFIG: LayoutConfig = {
     ctaButtonText: 'ENTRAR NA FILA DE CORTE',
     ctaButtonPulse: true,
   },
-  sectionsOrder: ['profile', 'banner', 'action', 'barbers', 'queue', 'services', 'help', 'info'],
+  sectionsOrder: ['profile', 'banner', 'action', 'barbers', 'queue', 'info'],
   hiddenSections: [],
   floatingButtons: {
     showWhatsapp: true,

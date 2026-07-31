@@ -135,10 +135,10 @@ export default function Home() {
         );
 
       case 'services':
-        return <div key="services" style={{ marginBottom: '1.25rem' }}><ServicesSection /></div>;
+        return null;
 
       case 'help':
-        return <div key="help" style={{ marginBottom: '1.25rem' }}><HelpSection /></div>;
+        return null;
 
       case 'info':
         return <ShopInfo key="info" />;

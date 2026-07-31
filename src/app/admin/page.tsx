@@ -231,14 +231,19 @@ export default function AdminPage() {
             </p>
           </div>
         </div>
-        <button className="btn btn-outline btn-sm" onClick={() => setIsLoggedIn(false)} style={{ padding: '0.45rem 0.95rem', fontSize: '0.8rem', fontWeight: 700, gap: '0.4rem' }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Sair
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Link className="btn btn-gold btn-sm" href="/editor" style={{ textDecoration: 'none', padding: '0.45rem 0.95rem', fontSize: '0.8rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            🎨 Editor de Layout
+          </Link>
+          <button className="btn btn-outline btn-sm" onClick={() => setIsLoggedIn(false)} style={{ padding: '0.45rem 0.95rem', fontSize: '0.8rem', fontWeight: 700, gap: '0.4rem' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Sair
+          </button>
+        </div>
       </div>
 
       {/* ROW 2: CONTROL SWITCHES CARD */}
