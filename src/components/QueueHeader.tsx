@@ -33,7 +33,7 @@ export default function QueueHeader({ onJoinQueue, onMyAccount }: QueueHeaderPro
           Entrar na minha conta
         </button>
         <button
-          className={`btn ${config.isOpen && config.isQueueOpen ? 'btn-outline' : 'btn-outline'}`}
+          className={`btn ${config.isOpen && config.isQueueOpen ? 'btn-gold' : 'btn-closed'}`}
           onClick={onJoinQueue}
           disabled={!config.isOpen || !config.isQueueOpen}
         >

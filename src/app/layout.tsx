@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { QueueProvider } from '@/context/QueueContext';
+import { LayoutProvider } from '@/context/LayoutContext';
 
 export const metadata: Metadata = {
   title: 'Barbearia Del Rey - Fila Online em Tempo Real',
@@ -31,10 +32,12 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/images/logo.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@400;600;700;800&family=Oswald:wght@500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <QueueProvider>{children}</QueueProvider>
+        <LayoutProvider>
+          <QueueProvider>{children}</QueueProvider>
+        </LayoutProvider>
       </body>
     </html>
   );
