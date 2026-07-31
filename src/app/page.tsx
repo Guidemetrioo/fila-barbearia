@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useQueue } from '@/context/QueueContext';
 import { useLayout, SectionId } from '@/context/LayoutContext';
 import QueueHeader from '@/components/QueueHeader';
@@ -148,6 +148,37 @@ export default function Home() {
     }
   };
 
+  const renderNavigation = () => (
+    <div className="nav-tabs-shell">
+      <div className="nav-tabs" aria-label="Navegação principal">
+        <button
+          className={`nav-tab ${activeTab === 'queue' ? 'active' : ''}`}
+          onClick={() => setActiveTab('queue')}
+        >
+          Fila em Tempo Real
+        </button>
+        <button
+          className={`nav-tab ${activeTab === 'barbers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('barbers')}
+        >
+          Profissionais ({barbers.filter(b => b.status !== 'offline').length})
+        </button>
+        <button
+          className={`nav-tab ${activeTab === 'services' ? 'active' : ''}`}
+          onClick={() => setActiveTab('services')}
+        >
+          Serviços e Preços
+        </button>
+        <button
+          className={`nav-tab ${activeTab === 'help' ? 'active' : ''}`}
+          onClick={() => setActiveTab('help')}
+        >
+          Como Funciona
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <main className="page-container">
@@ -160,37 +191,16 @@ export default function Home() {
         {/* Gold separator */}
         <hr className="gold-separator" />
 
-        {/* Navigation Tabs Bar */}
-        <div className="nav-tabs" style={{ marginBottom: '1.5rem' }}>
-          <button
-            className={`nav-tab ${activeTab === 'queue' ? 'active' : ''}`}
-            onClick={() => setActiveTab('queue')}
-          >
-            Fila em Tempo Real
-          </button>
-          <button
-            className={`nav-tab ${activeTab === 'barbers' ? 'active' : ''}`}
-            onClick={() => setActiveTab('barbers')}
-          >
-            Profissionais ({barbers.filter(b => b.status !== 'offline').length})
-          </button>
-          <button
-            className={`nav-tab ${activeTab === 'services' ? 'active' : ''}`}
-            onClick={() => setActiveTab('services')}
-          >
-            Serviços e Preços
-          </button>
-          <button
-            className={`nav-tab ${activeTab === 'help' ? 'active' : ''}`}
-            onClick={() => setActiveTab('help')}
-          >
-            Como Funciona
-          </button>
-        </div>
+        {activeTab !== 'queue' && renderNavigation()}
 
         {/* Render sections dynamically according to configured order */}
         {activeTab === 'queue' && (
-          sectionsOrder.map(sectionId => renderSection(sectionId))
+          sectionsOrder.map(sectionId => (
+            <Fragment key={sectionId}>
+              {renderSection(sectionId)}
+              {sectionId === 'action' && renderNavigation()}
+            </Fragment>
+          ))
         )}
 
         {activeTab === 'barbers' && (
