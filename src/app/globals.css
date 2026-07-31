@@ -607,7 +607,29 @@ h1, h2, h3, h4, h5, h6 {
 .barber-card__wait {
   font-size: 0.825rem;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.barber-card__wait-icon {
+  flex: 0 0 auto;
+  margin-top: 0.2em;
+}
+
+.barber-card__wait-copy {
+  display: flex;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.barber-card__wait-value {
+  color: var(--gold-light);
+  font-weight: 700;
 }
 
 .barber-card__wait strong {
@@ -1184,6 +1206,16 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.25;
     text-align: center;
     word-break: break-word;
+  }
+  .barber-card__wait--stacked .barber-card__wait-copy {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    text-align: start;
+  }
+  .barber-card__wait--stacked .barber-card__wait-value {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   .nav-tabs {
     padding: 0.3rem;

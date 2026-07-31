@@ -22,6 +22,11 @@ export default function BarberCard({ barber, queueEntries, isFilterActive, onTog
     ? Math.max(0, Math.ceil((barber.breakUntil - Date.now()) / 60000))
     : 0;
 
+  const estimatedWait = isBreak
+    ? (remainingBreak > 0 ? `${remainingBreak} min (Pausa)` : 'Pausa')
+    : (totalWait === 0 ? 'Livre' : `${totalWait} minutos`);
+  const hasTimedWait = isBreak ? remainingBreak > 0 : totalWait > 0;
+
   const statusBg = isAvailable
     ? 'rgba(16, 185, 129, 0.14)'
     : isBreak
@@ -116,13 +121,14 @@ export default function BarberCard({ barber, queueEntries, isFilterActive, onTog
       </div>
 
       {/* Wait Time */}
-      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem', whiteSpace: 'nowrap' }}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2">
+      <div className={`barber-card__wait ${hasTimedWait ? 'barber-card__wait--stacked' : ''}`}>
+        <svg className="barber-card__wait-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
-        <span>
-          Tempo estimado: {isBreak ? (remainingBreak > 0 ? `${remainingBreak} min (Pausa)` : 'Pausa') : (totalWait === 0 ? 'Livre' : `${totalWait} minutos`)}
+        <span className="barber-card__wait-copy">
+          <span className="barber-card__wait-label">Tempo estimado:</span>
+          <span className="barber-card__wait-value">{estimatedWait}</span>
         </span>
       </div>
     </div>
